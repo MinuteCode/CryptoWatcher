@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">CryptoWatcher</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Home activity -->
+    <string name="ico_list_title">Your ICOs :</string>
+    <string name="no_ico_added">You didn\'t add any ICO yet !</string>
+
+    <!-- Add Token Activity -->
+    <string name="add_token_title">ADD A TOKEN</string>
+    <string name="ico_participation_details">Enter your investment details :</string>
+    <string name="token_name_hint">Token name</string>
+    <string name="invested_amount">Amount invested</string>
+    <string name="currency_name">Currency</string>
+    <string name="amount_received">Amount recieved</string>
+
+    <!-- Misc -->
+    <string name="invested_amount_describer">as</string>
+    <string name="dollar_symbol">$</string>
+</resources>
