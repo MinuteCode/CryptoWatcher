@@ -29,7 +29,6 @@ public class CMCTickerAdapter extends ArrayAdapter<CMCTicker> {
 
     private List<CMCTicker> tickerList;
     private Context context;
-    private int itemLayout;
     private List<CMCTicker> tickerListAllItems;
     private TickerDescription tickerDescription;
 
@@ -38,7 +37,6 @@ public class CMCTickerAdapter extends ArrayAdapter<CMCTicker> {
         tickerList = new ArrayList<>(list);
         tickerListAllItems = new ArrayList<>(list);
         this.context = context;
-        itemLayout = resource;
         tickerDescription = description;
     }
 

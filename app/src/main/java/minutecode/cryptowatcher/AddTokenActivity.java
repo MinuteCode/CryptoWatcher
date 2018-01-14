@@ -1,8 +1,9 @@
 package minutecode.cryptowatcher;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -80,8 +81,8 @@ public class AddTokenActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent resultIntent = new Intent();
-                resultIntent.putExtra("receivedTicker", selectedTicker);
-                resultIntent.putExtra("investedTicker", investedTicker);
+                resultIntent.putExtra("receivedTicker", (Parcelable) selectedTicker);
+                resultIntent.putExtra("investedTicker", (Parcelable) investedTicker);
                 resultIntent.putExtra("investedAmount", Double.valueOf(investedAmount.getText().toString()));
                 resultIntent.putExtra("receivedAmount", Double.valueOf(receivedAmount.getText().toString()));
                 setResult(RESULT_OK,resultIntent);

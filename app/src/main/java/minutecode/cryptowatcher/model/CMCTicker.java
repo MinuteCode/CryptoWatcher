@@ -9,7 +9,7 @@ import java.io.Serializable;
  * Created by Benjamin on 1/13/2018.
  */
 
-public class CMCTicker implements Parcelable {
+public class CMCTicker implements Parcelable, Serializable {
 
     private String id;
     private String name;

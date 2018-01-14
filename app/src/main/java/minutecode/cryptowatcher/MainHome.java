@@ -3,25 +3,36 @@ package minutecode.cryptowatcher;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import minutecode.cryptowatcher.model.CMCTicker;
 import minutecode.cryptowatcher.model.Investment;
+import minutecode.cryptowatcher.view.TokenRecapRecyclerAdapter;
 
 public class MainHome extends AppCompatActivity {
 
     final static int ADD_TOKEN_REQUEST = 1;
 
-    private List<CMCTicker> tokenList = new ArrayList<>();
+    private RecyclerView addedTokensRecyclerView;
+    private TokenRecapRecyclerAdapter tokenRecapAdapter;
+    private TextView noIcoText;
+
+    private List<Investment> investmentList = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +41,15 @@ public class MainHome extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        FileInputStream fis = null;
+        try {
+            fis = openFileInput("investments.bak");
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            investmentList = (ArrayList<Investment>) ois.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -37,6 +57,24 @@ public class MainHome extends AppCompatActivity {
                 goToTokenAddition();
             }
         });
+
+        addedTokensRecyclerView = findViewById(R.id.added_token_recycler_view);
+        addedTokensRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        tokenRecapAdapter = new TokenRecapRecyclerAdapter(investmentList);
+        addedTokensRecyclerView.setAdapter(tokenRecapAdapter);
+
+        noIcoText = findViewById(R.id.no_ico_text);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (investmentList.size() > 0) {
+            noIcoText.setVisibility(View.INVISIBLE);
+        } else {
+            noIcoText.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -77,7 +115,22 @@ public class MainHome extends AppCompatActivity {
                     double receivedAmount = data.getDoubleExtra("receivedAmount", 0.0);
 
                     Investment investment = new Investment(addedTicker, receivedAmount, investedTicker, investedAmount);
+                    investmentList.add(investment);
+                    tokenRecapAdapter = new TokenRecapRecyclerAdapter(investmentList);
+                    addedTokensRecyclerView.setAdapter(tokenRecapAdapter);
                 }
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        try {
+            FileOutputStream fos = openFileOutput("investments.bak", MODE_PRIVATE);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(investmentList);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
