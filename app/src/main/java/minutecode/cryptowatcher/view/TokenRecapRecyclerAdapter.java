@@ -1,5 +1,6 @@
 package minutecode.cryptowatcher.view;
 
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,9 +23,11 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView tokenName, receivedAmount, dollarConversion;
+        public CardView tokenCard;
 
         public ViewHolder(View v) {
             super(v);
+            tokenCard = v.findViewById(R.id.token_card);
             tokenName = v.findViewById(R.id.received_token_name);
             receivedAmount = v.findViewById(R.id.received_amount);
             dollarConversion = v.findViewById(R.id.dollar_result);
@@ -45,10 +48,10 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
     @Override
     public void onBindViewHolder(TokenRecapRecyclerAdapter.ViewHolder holder, int position) {
         Investment token = tokenList.get(position);
-
+        holder.tokenCard.setCardElevation(24);
         holder.tokenName.setText(token.getReceivedToken().getFullName());
-        holder.receivedAmount.setText(Double.toString(token.getReceivedAmount()));
-        holder.dollarConversion.setText(Double.toString(token.getTotalFiatAmount()));
+        holder.receivedAmount.setText(Double.toString(token.getReceivedAmount()) + " " + token.getReceivedToken().getSymbol());
+        holder.dollarConversion.setText(Double.toString(token.getTotalFiatAmount()) + " $");
     }
 
     @Override

@@ -17,6 +17,7 @@ import com.koushikdutta.ion.Ion;
 import java.util.ArrayList;
 import java.util.List;
 
+import minutecode.cryptowatcher.model.Config;
 import minutecode.cryptowatcher.model.CryptoCompareCoinListResponse;
 import minutecode.cryptowatcher.model.CryptoCompareTicker;
 import minutecode.cryptowatcher.view.CryptoCompareTickerAdapter;
@@ -50,7 +51,7 @@ public class AddTokenActivity extends AppCompatActivity {
         tickerList = new ArrayList<>();
 
         Ion.with(this)
-                .load("http://vps.antr.fr:8000/")
+                .load(Config.coinListUrl)
                 .as(new TypeToken<CryptoCompareCoinListResponse>() {
                 })
                 .setCallback(new FutureCallback<CryptoCompareCoinListResponse>() {

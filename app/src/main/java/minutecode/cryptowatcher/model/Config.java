@@ -1,4 +1,4 @@
-package minutecode.cryptowatcher;
+package minutecode.cryptowatcher.model;
 
 /**
  * Created by Benjamin on 1/14/2018.

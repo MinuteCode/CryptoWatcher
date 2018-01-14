@@ -24,6 +24,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import minutecode.cryptowatcher.model.Config;
 import minutecode.cryptowatcher.model.CryptoCompareTicker;
 import minutecode.cryptowatcher.model.Investment;
 import minutecode.cryptowatcher.view.TokenRecapRecyclerAdapter;
