@@ -17,8 +17,9 @@ import com.koushikdutta.ion.Ion;
 import java.util.ArrayList;
 import java.util.List;
 
-import minutecode.cryptowatcher.model.CMCTicker;
-import minutecode.cryptowatcher.view.CMCTickerAdapter;
+import minutecode.cryptowatcher.model.CryptoCompareCoinListResponse;
+import minutecode.cryptowatcher.model.CryptoCompareTicker;
+import minutecode.cryptowatcher.view.CryptoCompareTickerAdapter;
 
 public class AddTokenActivity extends AppCompatActivity {
 
@@ -28,12 +29,12 @@ public class AddTokenActivity extends AppCompatActivity {
     private EditText receivedAmount;
     private Button addTokenButton;
 
-    private List<CMCTicker> tickerList;
-    private CMCTickerAdapter cmcAdapterInvestment;
-    private CMCTickerAdapter cmcAdapterInvestmentSymbol;
+    private List<CryptoCompareTicker> tickerList;
+    private CryptoCompareTickerAdapter cmcAdapterInvestment;
+    private CryptoCompareTickerAdapter cmcAdapterInvestmentSymbol;
 
-    private CMCTicker selectedTicker;
-    private CMCTicker investedTicker;
+    private CryptoCompareTicker selectedTicker;
+    private CryptoCompareTicker investedTicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,17 +48,27 @@ public class AddTokenActivity extends AppCompatActivity {
         addTokenButton = findViewById(R.id.add_token);
 
         tickerList = new ArrayList<>();
-        tickerNames.setAdapter(cmcAdapterInvestment);
 
         Ion.with(this)
-                .load("https://api.coinmarketcap.com/v1/ticker/?limit=0")
-                .as(new TypeToken<List<CMCTicker>>(){})
-                .setCallback(new FutureCallback<List<CMCTicker>>() {
+                .load("http://vps.antr.fr:8000/")
+                .as(new TypeToken<CryptoCompareCoinListResponse>() {
+                })
+                .setCallback(new FutureCallback<CryptoCompareCoinListResponse>() {
                     @Override
-                    public void onCompleted(Exception e, List<CMCTicker> result) {
-                        tickerList = result;
-                        cmcAdapterInvestment = new CMCTickerAdapter(getApplicationContext(), R.layout.cmc_ticker_adapter_layout, tickerList, CMCTickerAdapter.TickerDescription.NAME);
-                        cmcAdapterInvestmentSymbol = new CMCTickerAdapter(getApplicationContext(), R.layout.cmc_ticker_adapter_layout, tickerList, CMCTickerAdapter.TickerDescription.SYMBOL);
+                    public void onCompleted(Exception e, CryptoCompareCoinListResponse result) {
+                        tickerList = result.getCoin();
+                        cmcAdapterInvestment = new CryptoCompareTickerAdapter(
+                                getApplicationContext(),
+                                R.layout.crypto_compare_ticker_adapter_layout,
+                                tickerList,
+                                CryptoCompareTickerAdapter.TickerDescription.NAME
+                        );
+                        cmcAdapterInvestmentSymbol = new CryptoCompareTickerAdapter(
+                                getApplicationContext(),
+                                R.layout.crypto_compare_ticker_adapter_layout,
+                                tickerList,
+                                CryptoCompareTickerAdapter.TickerDescription.SYMBOL
+                        );
                         tickerNames.setAdapter(cmcAdapterInvestment);
                         investmentTickerSymbol.setAdapter(cmcAdapterInvestmentSymbol);
                     }
@@ -83,9 +94,9 @@ public class AddTokenActivity extends AppCompatActivity {
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("receivedTicker", (Parcelable) selectedTicker);
                 resultIntent.putExtra("investedTicker", (Parcelable) investedTicker);
-                resultIntent.putExtra("investedAmount", Double.valueOf(investedAmount.getText().toString()));
                 resultIntent.putExtra("receivedAmount", Double.valueOf(receivedAmount.getText().toString()));
-                setResult(RESULT_OK,resultIntent);
+                resultIntent.putExtra("investedAmount", Double.valueOf(investedAmount.getText().toString()));
+                setResult(RESULT_OK, resultIntent);
                 finish();
             }
         });

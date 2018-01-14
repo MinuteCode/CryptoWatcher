@@ -46,9 +46,9 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
     public void onBindViewHolder(TokenRecapRecyclerAdapter.ViewHolder holder, int position) {
         Investment token = tokenList.get(position);
 
-        holder.tokenName.setText(token.getReceivedToken().getName());
+        holder.tokenName.setText(token.getReceivedToken().getFullName());
         holder.receivedAmount.setText(Double.toString(token.getReceivedAmount()));
-        holder.dollarConversion.setText(Double.toString(token.computeReceivedDollarConversion()));
+        holder.dollarConversion.setText(Double.toString(token.getTotalFiatAmount()));
     }
 
     @Override

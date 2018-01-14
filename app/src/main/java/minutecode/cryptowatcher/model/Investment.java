@@ -11,36 +11,42 @@ import java.io.Serializable;
  */
 
 public class Investment implements Serializable {
-    private CMCTicker receivedToken;
-    private CMCTicker investedTicker;
+    private CryptoCompareTicker receivedToken;
+    private CryptoCompareTicker investedTicker;
     private double receivedAmount;
     private double investedAmount;
 
-    public Investment(CMCTicker receivedToken, double receivedAmount, CMCTicker investedTicker, double investedAmount) {
+    private double totalFiatAmount;
+
+    public Investment(CryptoCompareTicker receivedToken, double receivedAmount, CryptoCompareTicker investedTicker, double investedAmount) {
         this.receivedToken = receivedToken;
         this.investedTicker = investedTicker;
         this.receivedAmount = receivedAmount;
         this.investedAmount = investedAmount;
     }
 
-    public double computeReceivedDollarConversion() {
-        return receivedAmount * Double.valueOf(receivedToken.getPrice_usd());
+    public void computeReceivedDollarConversion(Double price) {
+        totalFiatAmount = receivedAmount * price;
     }
 
-    public CMCTicker getReceivedToken() {
+    public CryptoCompareTicker getReceivedToken() {
         return receivedToken;
     }
 
-    public void setReceivedToken(CMCTicker receivedToken) {
+    public void setReceivedToken(CryptoCompareTicker receivedToken) {
         this.receivedToken = receivedToken;
     }
 
-    public CMCTicker getInvestedTicker() {
+    public CryptoCompareTicker getInvestedTicker() {
         return investedTicker;
     }
 
-    public void setInvestedTicker(CMCTicker investedTicker) {
+    public void setInvestedTicker(CryptoCompareTicker investedTicker) {
         this.investedTicker = investedTicker;
+    }
+
+    public double getTotalFiatAmount() {
+        return totalFiatAmount;
     }
 
     public double getReceivedAmount() {

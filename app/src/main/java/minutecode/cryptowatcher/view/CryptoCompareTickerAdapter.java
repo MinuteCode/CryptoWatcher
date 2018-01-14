@@ -14,25 +14,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import minutecode.cryptowatcher.R;
-import minutecode.cryptowatcher.model.CMCTicker;
+import minutecode.cryptowatcher.model.CryptoCompareTicker;
 
 /**
  * Created by Benjamin on 1/13/2018.
  */
 
-public class CMCTickerAdapter extends ArrayAdapter<CMCTicker> {
+public class CryptoCompareTickerAdapter extends ArrayAdapter<CryptoCompareTicker> {
 
     public enum TickerDescription {
         NAME,
         SYMBOL
     }
 
-    private List<CMCTicker> tickerList;
+    private List<CryptoCompareTicker> tickerList;
     private Context context;
-    private List<CMCTicker> tickerListAllItems;
+    private List<CryptoCompareTicker> tickerListAllItems;
     private TickerDescription tickerDescription;
 
-    public CMCTickerAdapter(@NonNull Context context, int resource, List<CMCTicker> list, TickerDescription description) {
+    public CryptoCompareTickerAdapter(@NonNull Context context, int resource, List<CryptoCompareTicker> list, TickerDescription description) {
         super(context, resource, list);
         tickerList = new ArrayList<>(list);
         tickerListAllItems = new ArrayList<>(list);
@@ -47,7 +47,7 @@ public class CMCTickerAdapter extends ArrayAdapter<CMCTicker> {
 
     @Nullable
     @Override
-    public CMCTicker getItem(int position) {
+    public CryptoCompareTicker getItem(int position) {
         return tickerList.get(position);
     }
 
@@ -60,21 +60,17 @@ public class CMCTickerAdapter extends ArrayAdapter<CMCTicker> {
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         if (convertView == null) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.cmc_ticker_adapter_layout, parent, false);
+            convertView = LayoutInflater.from(context).inflate(R.layout.crypto_compare_ticker_adapter_layout, parent, false);
         }
 
-        CMCTicker ticker = getItem(position);
+        CryptoCompareTicker ticker = getItem(position);
 
         TextView name = convertView.findViewById(R.id.ticker_name);
-        TextView price = convertView.findViewById(R.id.ticker_price);
 
         if (tickerDescription == TickerDescription.NAME) {
-            name.setText(ticker.getName());
-            String cryptoPrice = ticker.getPrice_usd() + " " + context.getString(R.string.dollar_symbol);
-            price.setText(cryptoPrice);
+            name.setText(ticker.getFullName());
         } else {
             name.setText(ticker.getSymbol());
-            price.setText("");
         }
 
         return convertView;
@@ -87,17 +83,22 @@ public class CMCTickerAdapter extends ArrayAdapter<CMCTicker> {
 
             @Override
             public CharSequence convertResultToString(Object resultValue) {
-                return ((CMCTicker) resultValue).getName();
+                if (tickerDescription == TickerDescription.NAME)
+                    return ((CryptoCompareTicker) resultValue).getFullName();
+                else if (tickerDescription == TickerDescription.SYMBOL)
+                    return ((CryptoCompareTicker) resultValue).getSymbol();
+
+                return "";
             }
 
             @Override
             protected FilterResults performFiltering(CharSequence charSequence) {
                 FilterResults filterResults = new FilterResults();
-                List<CMCTicker> tickerSuggestions = new ArrayList<>();
+                List<CryptoCompareTicker> tickerSuggestions = new ArrayList<>();
 
                 if (charSequence != null) {
-                    for (CMCTicker ticker : tickerListAllItems) {
-                        if (ticker.getName().toLowerCase().startsWith(charSequence.toString().toLowerCase()) && tickerDescription == TickerDescription.NAME) {
+                    for (CryptoCompareTicker ticker : tickerListAllItems) {
+                        if (ticker.getFullName().toLowerCase().startsWith(charSequence.toString().toLowerCase()) && tickerDescription == TickerDescription.NAME) {
                             tickerSuggestions.add(ticker);
                         } else if (ticker.getSymbol().toLowerCase().startsWith(charSequence.toString().toLowerCase()) && tickerDescription == TickerDescription.SYMBOL) {
                             tickerSuggestions.add(ticker);
@@ -116,8 +117,8 @@ public class CMCTickerAdapter extends ArrayAdapter<CMCTicker> {
 
                 if (filterResults != null && filterResults.count > 0) {
                     for (Object object : (List<?>) filterResults.values) {
-                        if (object instanceof CMCTicker) {
-                            tickerList.add((CMCTicker) object);
+                        if (object instanceof CryptoCompareTicker) {
+                            tickerList.add((CryptoCompareTicker) object);
                         }
                     }
                     notifyDataSetChanged();

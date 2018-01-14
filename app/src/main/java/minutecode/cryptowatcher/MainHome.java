@@ -12,6 +12,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
@@ -19,7 +24,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import minutecode.cryptowatcher.model.CMCTicker;
+import minutecode.cryptowatcher.model.CryptoCompareTicker;
 import minutecode.cryptowatcher.model.Investment;
 import minutecode.cryptowatcher.view.TokenRecapRecyclerAdapter;
 
@@ -72,6 +77,7 @@ public class MainHome extends AppCompatActivity {
         super.onResume();
         if (investmentList.size() > 0) {
             noIcoText.setVisibility(View.INVISIBLE);
+
         } else {
             noIcoText.setVisibility(View.VISIBLE);
         }
@@ -109,15 +115,25 @@ public class MainHome extends AppCompatActivity {
         switch (requestCode) {
             case ADD_TOKEN_REQUEST:
                 if (resultCode == RESULT_OK) {
-                    CMCTicker addedTicker = data.getParcelableExtra("receivedTicker");
-                    CMCTicker investedTicker = data.getParcelableExtra("investedTicker");
-                    double investedAmount = data.getDoubleExtra("investedAmount",0.0);
-                    double receivedAmount = data.getDoubleExtra("receivedAmount", 0.0);
+                    final CryptoCompareTicker addedTicker = data.getParcelableExtra("receivedTicker");
+                    final CryptoCompareTicker investedTicker = data.getParcelableExtra("investedTicker");
+                    final double investedAmount = data.getDoubleExtra("investedAmount", 0.0);
+                    final double receivedAmount = data.getDoubleExtra("receivedAmount", 0.0);
 
-                    Investment investment = new Investment(addedTicker, receivedAmount, investedTicker, investedAmount);
-                    investmentList.add(investment);
-                    tokenRecapAdapter = new TokenRecapRecyclerAdapter(investmentList);
-                    addedTokensRecyclerView.setAdapter(tokenRecapAdapter);
+                    Ion.with(this)
+                            .load(Config.baseUrl + Config.conversionUrlStart + addedTicker.getSymbol() + Config.conversionUrlMiddle + "USD")
+                            .as(new TypeToken<JsonObject>() {
+                            })
+                            .setCallback(new FutureCallback<JsonObject>() {
+                                @Override
+                                public void onCompleted(Exception e, JsonObject result) {
+                                    Investment investment = new Investment(addedTicker, receivedAmount, investedTicker, investedAmount);
+                                    investment.computeReceivedDollarConversion(result.get("USD").getAsDouble());
+                                    investmentList.add(investment);
+                                    tokenRecapAdapter = new TokenRecapRecyclerAdapter(investmentList);
+                                    addedTokensRecyclerView.setAdapter(tokenRecapAdapter);
+                                }
+                            });
                 }
         }
     }
