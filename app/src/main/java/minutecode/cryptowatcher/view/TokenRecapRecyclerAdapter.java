@@ -33,7 +33,6 @@ import minutecode.cryptowatcher.model.Investment;
 public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRecyclerAdapter.ViewHolder> {
 
     private ArrayList<Investment> tokenList;
-    private RefreshCallback refreshCallback;
 
     class ViewHolder extends RecyclerView.ViewHolder {
         TextView tokenName, receivedAmount, dollarConversion;
@@ -95,26 +94,5 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
     @Override
     public int getItemCount() {
         return tokenList.size();
-    }
-
-    public void hideTotalFiatAmount() {
-        for (Investment investment :
-                tokenList) {
-            investment.setTotalFiatAmount(0);
-        }
-    }
-
-    public RefreshCallback getRefreshCallback() {
-        return refreshCallback;
-    }
-
-    public void setRefreshCallback(RefreshCallback refreshCallback) {
-        this.refreshCallback = refreshCallback;
-    }
-
-    public interface RefreshCallback {
-        void onRefreshStarted();
-
-        void onRefreshComplete();
     }
 }
