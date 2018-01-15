@@ -12,13 +12,15 @@ import java.io.Serializable;
 public class CryptoCompareTicker implements Parcelable, Serializable {
 
     private String Name;
+    private String CoinName;
     private String Symbol;
     private String FullName;
     private String TotalCoinSupply;
     private String ImageUrl;
 
-    public CryptoCompareTicker(String name, String symbol, String fullName, String totalCoinSupply, String imageUrl) {
+    public CryptoCompareTicker(String name, String coinName, String symbol, String fullName, String totalCoinSupply, String imageUrl) {
         Name = name;
+        CoinName = coinName;
         Symbol = symbol;
         FullName = fullName;
         TotalCoinSupply = totalCoinSupply;
@@ -27,10 +29,19 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
 
     public CryptoCompareTicker(Parcel in) {
         Name = in.readString();
+        CoinName = in.readString();
         Symbol = in.readString();
         FullName = in.readString();
         TotalCoinSupply = in.readString();
         ImageUrl = in.readString();
+    }
+
+    public String getCoinName() {
+        return CoinName;
+    }
+
+    public void setCoinName(String coinName) {
+        CoinName = coinName;
     }
 
     public String getName() {
@@ -81,6 +92,7 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(Name);
+        parcel.writeString(CoinName);
         parcel.writeString(Symbol);
         parcel.writeString(FullName);
         parcel.writeString(TotalCoinSupply);

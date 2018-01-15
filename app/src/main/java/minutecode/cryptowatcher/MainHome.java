@@ -3,6 +3,7 @@ package minutecode.cryptowatcher;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -35,10 +36,11 @@ public class MainHome extends AppCompatActivity {
 
     private RecyclerView addedTokensRecyclerView;
     private TokenRecapRecyclerAdapter tokenRecapAdapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private TextView noIcoText;
 
     private List<Investment> investmentList = new ArrayList<>();
-
+    private int updatedInvestments = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +71,41 @@ public class MainHome extends AppCompatActivity {
         tokenRecapAdapter = new TokenRecapRecyclerAdapter(investmentList);
         addedTokensRecyclerView.setAdapter(tokenRecapAdapter);
 
+        swipeRefreshLayout = findViewById(R.id.refresh_tokens_price_layout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                for (int i = 0; i < investmentList.size(); i++) {
+                    final Investment investment = investmentList.get(i);
+                    final int finalI = i;
+                    Ion.with(MainHome.this)
+                            .load(Config.baseAPIUrl + Config.conversionUrlStart + investment.getReceivedToken().getSymbol() + Config.conversionUrlMiddle + "USD")
+                            .asJsonObject()
+                            .setCallback(new FutureCallback<JsonObject>() {
+                                @Override
+                                public void onCompleted(Exception e, JsonObject result) {
+                                    double conversionDollar = result.get("USD").getAsDouble();
+                                    conversionDollar *= investment.getReceivedAmount();
+
+                                    investment.setTotalFiatAmount(conversionDollar);
+
+                                    tokenRecapAdapter.notifyItemChanged(finalI);
+                                    updatedInvestments++;
+                                    if (updatedInvestments == investmentList.size()) {
+                                        updatedInvestments = 0;
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                swipeRefreshLayout.setRefreshing(false);
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                }
+            }
+        });
+
         noIcoText = findViewById(R.id.no_ico_text);
 
     }
@@ -78,7 +115,6 @@ public class MainHome extends AppCompatActivity {
         super.onResume();
         if (investmentList.size() > 0) {
             noIcoText.setVisibility(View.INVISIBLE);
-
         } else {
             noIcoText.setVisibility(View.VISIBLE);
         }
@@ -122,7 +158,7 @@ public class MainHome extends AppCompatActivity {
                     final double receivedAmount = data.getDoubleExtra("receivedAmount", 0.0);
 
                     Ion.with(this)
-                            .load(Config.baseUrl + Config.conversionUrlStart + addedTicker.getSymbol() + Config.conversionUrlMiddle + "USD")
+                            .load(Config.baseAPIUrl + Config.conversionUrlStart + addedTicker.getSymbol() + Config.conversionUrlMiddle + "USD")
                             .as(new TypeToken<JsonObject>() {
                             })
                             .setCallback(new FutureCallback<JsonObject>() {
@@ -131,23 +167,41 @@ public class MainHome extends AppCompatActivity {
                                     Investment investment = new Investment(addedTicker, receivedAmount, investedTicker, investedAmount);
                                     investment.computeReceivedDollarConversion(result.get("USD").getAsDouble());
                                     investmentList.add(investment);
-                                    tokenRecapAdapter = new TokenRecapRecyclerAdapter(investmentList);
-                                    addedTokensRecyclerView.setAdapter(tokenRecapAdapter);
+                                    tokenRecapAdapter.notifyItemInserted(investmentList.size() - 1);
+                                    saveInvestmentListToFile();
                                 }
                             });
                 }
         }
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        try {
-            FileOutputStream fos = openFileOutput("investments.bak", MODE_PRIVATE);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(investmentList);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void saveInvestmentListToFile() {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                FileOutputStream fos = null;
+                ObjectOutputStream oos = null;
+                try {
+                    fos = openFileOutput("investments.bak", MODE_PRIVATE);
+                    oos = new ObjectOutputStream(fos);
+                    oos.writeObject(investmentList);
+                    oos.flush();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        fos.close();
+                        if (oos != null) {
+                            oos.flush();
+                            oos.close();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        t.start();
     }
+
 }

@@ -49,6 +49,10 @@ public class Investment implements Serializable {
         return totalFiatAmount;
     }
 
+    public void setTotalFiatAmount(double value) {
+        totalFiatAmount = value;
+    }
+
     public double getReceivedAmount() {
         return receivedAmount;
     }
