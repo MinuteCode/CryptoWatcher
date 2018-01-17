@@ -17,6 +17,8 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
     private String FullName;
     private String TotalCoinSupply;
     private String ImageUrl;
+    private double originalConversionRateFiat;
+    private double nowConversionRateFiat;
 
     public CryptoCompareTicker(String name, String coinName, String symbol, String fullName, String totalCoinSupply, String imageUrl) {
         Name = name;
@@ -25,6 +27,8 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
         FullName = fullName;
         TotalCoinSupply = totalCoinSupply;
         ImageUrl = imageUrl;
+        originalConversionRateFiat = 0;
+        nowConversionRateFiat = 0;
     }
 
     public CryptoCompareTicker(Parcel in) {
@@ -34,6 +38,24 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
         FullName = in.readString();
         TotalCoinSupply = in.readString();
         ImageUrl = in.readString();
+        originalConversionRateFiat = in.readDouble();
+        nowConversionRateFiat = in.readDouble();
+    }
+
+    public double getNowConversionRateFiat() {
+        return nowConversionRateFiat;
+    }
+
+    public void setNowConversionRateFiat(double nowConversionRateFiat) {
+        this.nowConversionRateFiat = nowConversionRateFiat;
+    }
+
+    public double getOriginalConversionRateFiat() {
+        return originalConversionRateFiat;
+    }
+
+    public void setOriginalConversionRateFiat(double originalConversionRateFiat) {
+        this.originalConversionRateFiat = originalConversionRateFiat;
     }
 
     public String getCoinName() {
@@ -97,6 +119,8 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
         parcel.writeString(FullName);
         parcel.writeString(TotalCoinSupply);
         parcel.writeString(ImageUrl);
+        parcel.writeDouble(originalConversionRateFiat);
+        parcel.writeDouble(nowConversionRateFiat);
     }
 
     public static final Parcelable.Creator<CryptoCompareTicker> CREATOR = new Parcelable.Creator<CryptoCompareTicker>() {

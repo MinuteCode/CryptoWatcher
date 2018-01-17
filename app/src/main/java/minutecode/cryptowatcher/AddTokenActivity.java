@@ -1,5 +1,6 @@
 package minutecode.cryptowatcher;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -8,14 +9,21 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.TextView;
 
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import minutecode.cryptowatcher.model.Config;
 import minutecode.cryptowatcher.model.CryptoCompareCoinListResponse;
@@ -28,6 +36,9 @@ public class AddTokenActivity extends AppCompatActivity {
     private AutoCompleteTextView investmentTickerSymbol;
     private EditText investedAmount;
     private EditText receivedAmount;
+    private EditText dateInvested;
+    private TextView valueAtInvestmentDate;
+    private TextView dateRecapTextView;
     private Button addTokenButton;
 
     private List<CryptoCompareTicker> tickerList;
@@ -36,6 +47,8 @@ public class AddTokenActivity extends AppCompatActivity {
 
     private CryptoCompareTicker selectedTicker;
     private CryptoCompareTicker investedTicker;
+
+    private Date investmentDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +60,57 @@ public class AddTokenActivity extends AppCompatActivity {
         investedAmount = findViewById(R.id.invested_amount_edit_text);
         receivedAmount = findViewById(R.id.received_amount_edit_text);
         addTokenButton = findViewById(R.id.add_token);
+        dateInvested = findViewById(R.id.date_edit_text);
+        valueAtInvestmentDate = findViewById(R.id.value_at_investment_date);
+        dateRecapTextView = findViewById(R.id.date_recap_textview);
+
+        dateInvested.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new DatePickerDialog(AddTokenActivity.this, new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker datePicker, int year, int month, int dayOfMonth) {
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        calendar.set(Calendar.MONTH, month);
+                        calendar.set(Calendar.YEAR, year);
+
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                        dateInvested.setText(sdf.format(calendar.getTime()));
+                        dateRecapTextView.setText(sdf.format(calendar.getTime()));
+
+
+                        investmentDate = calendar.getTime();
+
+                        String getHistoricPriceUrl = Config.baseAPIUrl
+                                + Config.conversionHistoricalUrlStart
+                                + investedTicker.getSymbol()
+                                + Config.conversionUrlMiddle
+                                + "USD"
+                                + Config.timeStampParameter
+                                + investmentDate.getTime() / 1000;
+
+                        Ion.with(AddTokenActivity.this)
+                                .load(getHistoricPriceUrl)
+                                .asJsonObject()
+                                .setCallback(new FutureCallback<JsonObject>() {
+                                    @Override
+                                    public void onCompleted(Exception e, JsonObject result) {
+                                        double investedTokenConversionRate = result.get(investedTicker.getSymbol())
+                                                .getAsJsonObject()
+                                                .get("USD")
+                                                .getAsDouble();
+                                        investedTicker.setOriginalConversionRateFiat(investedTokenConversionRate);
+                                        valueAtInvestmentDate.setText(Double.toString(investedTokenConversionRate * Double.valueOf(investedAmount.getText().toString())) + "$");
+                                    }
+                                });
+                    }
+                },
+                        Calendar.getInstance().get(Calendar.YEAR),
+                        Calendar.getInstance().get(Calendar.MONTH),
+                        Calendar.getInstance().get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
 
         tickerList = new ArrayList<>();
 
@@ -59,13 +123,13 @@ public class AddTokenActivity extends AppCompatActivity {
                     public void onCompleted(Exception e, CryptoCompareCoinListResponse result) {
                         tickerList = result.getCoin();
                         cmcAdapterInvestment = new CryptoCompareTickerAdapter(
-                                getApplicationContext(),
+                                AddTokenActivity.this,
                                 R.layout.crypto_compare_ticker_adapter_layout,
                                 tickerList,
                                 CryptoCompareTickerAdapter.TickerDescription.NAME
                         );
                         cmcAdapterInvestmentSymbol = new CryptoCompareTickerAdapter(
-                                getApplicationContext(),
+                                AddTokenActivity.this,
                                 R.layout.crypto_compare_ticker_adapter_layout,
                                 tickerList,
                                 CryptoCompareTickerAdapter.TickerDescription.SYMBOL
@@ -86,6 +150,18 @@ public class AddTokenActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 investedTicker = cmcAdapterInvestmentSymbol.getItem(position);
+                String getPriceUrl = Config.baseAPIUrl + Config.conversionUrlStart + investedTicker.getSymbol() + Config.conversionUrlMiddle + "USD";
+                Ion.with(AddTokenActivity.this)
+                        .load(getPriceUrl)
+                        .asJsonObject()
+                        .setCallback(new FutureCallback<JsonObject>() {
+                            @Override
+                            public void onCompleted(Exception e, JsonObject result) {
+                                investedTicker.setNowConversionRateFiat(
+                                        result.get("USD").getAsDouble()
+                                );
+                            }
+                        });
             }
         });
 

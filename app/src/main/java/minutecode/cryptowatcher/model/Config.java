@@ -10,5 +10,7 @@ public class Config {
     public static String baseImageUrl = "https://www.cryptocompare.com";
 
     public static final String conversionUrlStart = "price?fsym=";
+    public static final String conversionHistoricalUrlStart = "pricehistorical?fsym=";
     public static final String conversionUrlMiddle = "&tsyms=";
+    public static final String timeStampParameter = "&ts=";
 }

@@ -13,6 +13,8 @@
     <string name="invested_amount">Amount invested</string>
     <string name="currency_name">Currency</string>
     <string name="amount_received">Amount recieved</string>
+    <string name="on_date">On</string>
+    <string name="date">ICO participation date</string>
 
     <!-- Misc -->
     <string name="invested_amount_describer">as</string>

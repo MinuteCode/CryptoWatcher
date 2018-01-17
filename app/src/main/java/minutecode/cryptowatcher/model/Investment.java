@@ -14,19 +14,33 @@ public class Investment implements Serializable {
     private CryptoCompareTicker receivedToken;
     private CryptoCompareTicker investedTicker;
     private double receivedAmount;
-    private double investedAmount;
+    private double investedAmountCrypto;
+    private double tokenOutput;
 
     private double totalFiatAmount;
 
-    public Investment(CryptoCompareTicker receivedToken, double receivedAmount, CryptoCompareTicker investedTicker, double investedAmount) {
+    public Investment(CryptoCompareTicker receivedToken, double receivedAmount, CryptoCompareTicker investedTicker, double investedAmountCrypto) {
         this.receivedToken = receivedToken;
         this.investedTicker = investedTicker;
         this.receivedAmount = receivedAmount;
-        this.investedAmount = investedAmount;
+        this.investedAmountCrypto = investedAmountCrypto;
+        this.tokenOutput = 0;
     }
 
     public void computeReceivedDollarConversion(Double price) {
         totalFiatAmount = receivedAmount * price;
+    }
+
+    public void computeTokenOutput() {
+        tokenOutput = totalFiatAmount / investedTicker.getNowConversionRateFiat();
+    }
+
+    public double getTokenOutput() {
+        return tokenOutput;
+    }
+
+    public void setTokenOutput(double tokenOutput) {
+        this.tokenOutput = tokenOutput;
     }
 
     public CryptoCompareTicker getReceivedToken() {
@@ -61,12 +75,12 @@ public class Investment implements Serializable {
         this.receivedAmount = receivedAmount;
     }
 
-    public double getInvestedAmount() {
-        return investedAmount;
+    public double getInvestedAmountCrypto() {
+        return investedAmountCrypto;
     }
 
-    public void setInvestedAmount(double investedAmount) {
-        this.investedAmount = investedAmount;
+    public void setInvestedAmountCrypto(double investedAmountCrypto) {
+        this.investedAmountCrypto = investedAmountCrypto;
     }
 
     public void writeToFile(FileOutputStream fos) {

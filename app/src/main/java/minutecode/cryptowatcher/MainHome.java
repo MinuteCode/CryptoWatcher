@@ -93,6 +93,7 @@ public class MainHome extends AppCompatActivity {
                                     updatedInvestments++;
                                     if (updatedInvestments == investmentList.size()) {
                                         updatedInvestments = 0;
+                                        saveInvestmentListToFile();
                                         runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
@@ -166,6 +167,7 @@ public class MainHome extends AppCompatActivity {
                                 public void onCompleted(Exception e, JsonObject result) {
                                     Investment investment = new Investment(addedTicker, receivedAmount, investedTicker, investedAmount);
                                     investment.computeReceivedDollarConversion(result.get("USD").getAsDouble());
+                                    investment.computeTokenOutput();
                                     investmentList.add(investment);
                                     tokenRecapAdapter.notifyItemInserted(investmentList.size() - 1);
                                     saveInvestmentListToFile();
