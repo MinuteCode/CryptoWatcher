@@ -1,5 +1,6 @@
 package minutecode.cryptowatcher.view;
 
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import java.util.Locale;
 import minutecode.cryptowatcher.R;
 import minutecode.cryptowatcher.model.Config;
 import minutecode.cryptowatcher.model.Investment;
+import minutecode.cryptowatcher.model.InvestmentDiffCallback;
 
 /**
  * Created by Benjamin on 1/14/2018.
@@ -71,5 +73,14 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
     @Override
     public int getItemCount() {
         return tokenList.size();
+    }
+
+    public void updateTokenList(List<Investment> newList) {
+        final InvestmentDiffCallback diffCallback = new InvestmentDiffCallback(tokenList, newList);
+        final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+        tokenList.clear();
+        tokenList.addAll(newList);
+        diffResult.dispatchUpdatesTo(this);
     }
 }

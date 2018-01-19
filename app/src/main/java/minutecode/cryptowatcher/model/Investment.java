@@ -1,10 +1,18 @@
 package minutecode.cryptowatcher.model;
 
+import android.content.Context;
+
+import com.google.gson.JsonObject;
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+
+import minutecode.cryptowatcher.MainHome;
 
 /**
  * Created by Benjamin on 1/13/2018.
@@ -15,8 +23,8 @@ public class Investment implements Serializable {
     private CryptoCompareTicker investedTicker;
     private double receivedAmount;
     private double investedAmountCrypto;
-    private double tokenOutput;
 
+    private double tokenOutput;
     private double totalFiatAmount;
 
     public Investment(CryptoCompareTicker receivedToken, double receivedAmount, CryptoCompareTicker investedTicker, double investedAmountCrypto) {
@@ -83,6 +91,21 @@ public class Investment implements Serializable {
         this.investedAmountCrypto = investedAmountCrypto;
     }
 
+    public void refreshValues(Context ctx, final CryptoCompareTicker ticker, final String against, final int position) {
+        Ion.with(ctx)
+                .load(Config.baseAPIUrl + Config.conversionUrlStart + ticker.getSymbol() + Config.conversionUrlMiddle + against)
+                .asJsonObject()
+                .setCallback(new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception e, JsonObject result) {
+                        double conversionDollar = result.get(against).getAsDouble();
+
+                        ticker.setNowConversionRateFiat(conversionDollar);
+                        computeTokenOutput();
+                    }
+                });
+    }
+
     public void writeToFile(FileOutputStream fos) {
         ObjectOutputStream oos = null;
         try {
@@ -123,5 +146,17 @@ public class Investment implements Serializable {
         }
 
         return investment;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        Investment comparison = (Investment) obj;
+
+        return receivedToken.equals(comparison.getReceivedToken())
+                && investedTicker.equals(comparison.getInvestedTicker())
+                && receivedAmount == comparison.getReceivedAmount()
+                && investedAmountCrypto == comparison.getInvestedAmountCrypto()
+                && tokenOutput == comparison.getTokenOutput()
+                && totalFiatAmount == comparison.getTotalFiatAmount();
     }
 }

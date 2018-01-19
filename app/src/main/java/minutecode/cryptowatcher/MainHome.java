@@ -30,7 +30,7 @@ import minutecode.cryptowatcher.model.CryptoCompareTicker;
 import minutecode.cryptowatcher.model.Investment;
 import minutecode.cryptowatcher.view.TokenRecapRecyclerAdapter;
 
-public class MainHome extends AppCompatActivity {
+public class MainHome extends AppCompatActivity{
 
     final static int ADD_TOKEN_REQUEST = 1;
 
@@ -78,6 +78,7 @@ public class MainHome extends AppCompatActivity {
                 for (int i = 0; i < investmentList.size(); i++) {
                     final Investment investment = investmentList.get(i);
                     final int finalI = i;
+
                     Ion.with(MainHome.this)
                             .load(Config.baseAPIUrl + Config.conversionUrlStart + investment.getReceivedToken().getSymbol() + Config.conversionUrlMiddle + "USD")
                             .asJsonObject()
@@ -85,12 +86,35 @@ public class MainHome extends AppCompatActivity {
                                 @Override
                                 public void onCompleted(Exception e, JsonObject result) {
                                     double conversionDollar = result.get("USD").getAsDouble();
-                                    conversionDollar *= investment.getReceivedAmount();
+                                    investment.getReceivedToken().setNowConversionRateFiat(conversionDollar);
+                                    investment.computeReceivedDollarConversion(investment.getReceivedToken().getNowConversionRateFiat());
 
-                                    investment.setTotalFiatAmount(conversionDollar);
-
-                                    tokenRecapAdapter.notifyItemChanged(finalI);
                                     updatedInvestments++;
+                                    if (updatedInvestments == investmentList.size()) {
+                                        updatedInvestments = 0;
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                tokenRecapAdapter.updateTokenList(investmentList);
+                                                swipeRefreshLayout.setRefreshing(false);
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+
+                    investment.refreshValues(MainHome.this, investment.getInvestedTicker(), "USD", i);
+
+                    /*Ion.with(MainHome.this)
+                            .load(Config.baseAPIUrl + Config.conversionUrlStart + investment.getInvestedTicker().getSymbol() + Config.conversionUrlMiddle + "USD")
+                            .asJsonObject()
+                            .setCallback(new FutureCallback<JsonObject>() {
+                                @Override
+                                public void onCompleted(Exception e, JsonObject result) {
+                                    double conversionDollar = result.get("USD").getAsDouble();
+
+                                    investment.getInvestedTicker().setNowConversionRateFiat(conversionDollar);
+                                    investment.computeTokenOutput();
                                     if (updatedInvestments == investmentList.size()) {
                                         updatedInvestments = 0;
                                         saveInvestmentListToFile();
@@ -102,7 +126,7 @@ public class MainHome extends AppCompatActivity {
                                         });
                                     }
                                 }
-                            });
+                            });*/
                 }
             }
         });
@@ -158,6 +182,8 @@ public class MainHome extends AppCompatActivity {
                     final double investedAmount = data.getDoubleExtra("investedAmount", 0.0);
                     final double receivedAmount = data.getDoubleExtra("receivedAmount", 0.0);
 
+                    final Investment investment = new Investment(addedTicker, receivedAmount, investedTicker, investedAmount);
+
                     Ion.with(this)
                             .load(Config.baseAPIUrl + Config.conversionUrlStart + addedTicker.getSymbol() + Config.conversionUrlMiddle + "USD")
                             .as(new TypeToken<JsonObject>() {
@@ -165,12 +191,10 @@ public class MainHome extends AppCompatActivity {
                             .setCallback(new FutureCallback<JsonObject>() {
                                 @Override
                                 public void onCompleted(Exception e, JsonObject result) {
-                                    Investment investment = new Investment(addedTicker, receivedAmount, investedTicker, investedAmount);
                                     investment.computeReceivedDollarConversion(result.get("USD").getAsDouble());
                                     investment.computeTokenOutput();
                                     investmentList.add(investment);
-                                    tokenRecapAdapter.notifyItemInserted(investmentList.size() - 1);
-                                    saveInvestmentListToFile();
+                                    tokenRecapAdapter.updateTokenList(investmentList);
                                 }
                             });
                 }
@@ -205,5 +229,4 @@ public class MainHome extends AppCompatActivity {
         });
         t.start();
     }
-
 }

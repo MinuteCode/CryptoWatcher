@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/token_card"
     android:layout_width="match_parent"
-    android:layout_height="100dp"
+    android:layout_height="150dp"
     android:layout_marginBottom="8dp"
     android:layout_marginEnd="8dp"
     android:layout_marginStart="8dp"
@@ -27,7 +28,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:text="received token name"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/token_image"
             app:layout_constraintEnd_toStartOf="@+id/invested_token_output"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@+id/token_image"
@@ -41,19 +42,17 @@
             android:layout_marginEnd="16dp"
             android:text="Received amount"
             app:layout_constraintBottom_toTopOf="@+id/dollar_result"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/token_image" />
 
         <TextView
             android:id="@+id/dollar_result"
             android:layout_width="wrap_content"
             android:layout_height="20dp"
-            android:layout_marginBottom="8dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginTop="8dp"
             android:text="dollar output"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintBaseline_toBaselineOf="@+id/received_token_name"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <TextView
             android:id="@+id/invested_token_output"
@@ -62,18 +61,17 @@
             android:layout_marginEnd="16dp"
             android:layout_marginTop="8dp"
             android:text="invested token output"
+            app:layout_constraintBottom_toBottomOf="@+id/token_image"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/dollar_result" />
 
         <ImageView
             android:id="@+id/token_image"
             android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginBottom="8dp"
+            android:layout_height="100dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:src="@mipmap/ic_launcher"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -84,6 +82,45 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             app:layout_constraintGuide_percent="0.50097847" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginBottom="0dp"
+            android:layout_marginEnd="0dp"
+            android:layout_marginStart="0dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <TextView
+                android:id="@+id/roi_fiat"
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="33"
+                android:gravity="center"
+                android:text="Fiat"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/roi_crypto"
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="33"
+                android:gravity="center"
+                android:text="Crypto"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/roi_trend"
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="33"
+                android:gravity="center"
+                android:text="Trend"
+                android:textAlignment="center" />
+
+        </LinearLayout>
 
     </android.support.constraint.ConstraintLayout>
 

@@ -135,4 +135,21 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
             return new CryptoCompareTicker[i];
         }
     };
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof CryptoCompareTicker) {
+            final CryptoCompareTicker tick = (CryptoCompareTicker) obj;
+            return Name.equals(tick.getName())
+                    && CoinName.equals(tick.getCoinName())
+                    && Symbol.equals(tick.getSymbol())
+                    && FullName.equals(tick.getFullName())
+                    && TotalCoinSupply.equals(tick.getTotalCoinSupply())
+                    && ImageUrl.equals(tick.getImageUrl())
+                    && originalConversionRateFiat == tick.getOriginalConversionRateFiat()
+                    && nowConversionRateFiat == tick.getNowConversionRateFiat();
+        }
+        
+        return false;
+    }
 }
