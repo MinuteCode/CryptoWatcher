@@ -19,28 +19,47 @@ import java.io.Serializable;
 public class Investment implements Serializable {
     private CryptoCompareTicker receivedToken;
     private CryptoCompareTicker investedTicker;
-    private double receivedAmount;
-    private double investedAmountCrypto;
 
     private double tokenOutput;
     private double totalFiatAmount;
+    private double cryptoROI;
+    private double fiatROI;
 
     private RefreshCallback refreshListener;
 
-    public Investment(CryptoCompareTicker receivedToken, double receivedAmount, CryptoCompareTicker investedTicker, double investedAmountCrypto) {
+    public enum CounterpartType {
+        FIAT,
+        CRYPTO
+    }
+
+    public Investment(CryptoCompareTicker receivedToken, CryptoCompareTicker investedTicker) {
         this.receivedToken = receivedToken;
         this.investedTicker = investedTicker;
-        this.receivedAmount = receivedAmount;
-        this.investedAmountCrypto = investedAmountCrypto;
         this.tokenOutput = 0;
     }
 
+    public double getCryptoROI() {
+        return cryptoROI;
+    }
+
+    public void setCryptoROI(double cryptoROI) {
+        this.cryptoROI = cryptoROI;
+    }
+
+    public double getFiatROI() {
+        return fiatROI;
+    }
+
+    public void setFiatROI(double fiatROI) {
+        this.fiatROI = fiatROI;
+    }
+
     public void computeReceivedDollarConversion() {
-        totalFiatAmount = receivedAmount * receivedToken.getNowConversionRateFiat();
+        totalFiatAmount = receivedToken.getAmount() * receivedToken.getNowConversionRateFiat();
     }
 
     public void computeTokenOutput() {
-        tokenOutput = totalFiatAmount / investedTicker.getNowConversionRateFiat();
+        tokenOutput = receivedToken.getNowConversionRateCrypto() * receivedToken.getAmount();
     }
 
     public RefreshCallback getRefreshListener() {
@@ -83,23 +102,7 @@ public class Investment implements Serializable {
         totalFiatAmount = value;
     }
 
-    public double getReceivedAmount() {
-        return receivedAmount;
-    }
-
-    public void setReceivedAmount(double receivedAmount) {
-        this.receivedAmount = receivedAmount;
-    }
-
-    public double getInvestedAmountCrypto() {
-        return investedAmountCrypto;
-    }
-
-    public void setInvestedAmountCrypto(double investedAmountCrypto) {
-        this.investedAmountCrypto = investedAmountCrypto;
-    }
-
-    public void refreshValues(Context ctx, final CryptoCompareTicker ticker, final String against, final int position) {
+    public void refreshValue(Context ctx, final CryptoCompareTicker ticker, final String against, final CounterpartType type) {
         Ion.with(ctx)
                 .load(Config.baseAPIUrl + Config.conversionUrlStart + ticker.getSymbol() + Config.conversionUrlMiddle + against)
                 .asJsonObject()
@@ -107,17 +110,24 @@ public class Investment implements Serializable {
                     @Override
                     public void onCompleted(Exception e, JsonObject result) {
                         if (e == null) {
-                            double conversionDollar = result.get(against).getAsDouble();
+                            double conversion = result.get(against).getAsDouble();
 
-                            ticker.setNowConversionRateFiat(conversionDollar);
-                            computeReceivedDollarConversion();
-                            computeTokenOutput();
+                            switch (type) {
+                                case FIAT:
+                                    fiatROI = (conversion - ticker.getNowConversionRateFiat()) / conversion * 100;
+                                    ticker.setNowConversionRateFiat(conversion);
+                                    computeReceivedDollarConversion();
+                                    break;
+
+                                case CRYPTO:
+                                    cryptoROI = (conversion - ticker.getNowConversionRateCrypto()) / conversion * 100;
+                                    ticker.setNowConversionRateCrypto(conversion);
+                                    computeTokenOutput();
+                            }
+
+
                             refreshListener.refreshDone(Investment.this);
                         } else {
-                            /*ticker.setNowConversionRateFiat(0);
-                            computeReceivedDollarConversion();
-                            computeTokenOutput();
-                            refreshListener.refreshDone(Investment.this);*/
                             e.printStackTrace();
                         }
                     }
@@ -172,8 +182,6 @@ public class Investment implements Serializable {
 
         return receivedToken.equals(comparison.getReceivedToken())
                 && investedTicker.equals(comparison.getInvestedTicker())
-                && receivedAmount == comparison.getReceivedAmount()
-                && investedAmountCrypto == comparison.getInvestedAmountCrypto()
                 && tokenOutput == comparison.getTokenOutput()
                 && totalFiatAmount == comparison.getTotalFiatAmount();
     }

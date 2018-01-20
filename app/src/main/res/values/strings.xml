@@ -19,4 +19,5 @@
     <!-- Misc -->
     <string name="invested_amount_describer">as</string>
     <string name="dollar_symbol">$</string>
+    <string name="not_a_number">NaN</string>
 </resources>

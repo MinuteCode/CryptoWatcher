@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,8 +17,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import minutecode.cryptowatcher.model.CryptoCompareTicker;
 import minutecode.cryptowatcher.model.Investment;
@@ -35,7 +36,6 @@ public class MainHome extends AppCompatActivity implements Investment.RefreshCal
     private TextView noIcoText;
 
     private List<Investment> investmentList = new ArrayList<>();
-    private int updatedInvestments = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +48,12 @@ public class MainHome extends AppCompatActivity implements Investment.RefreshCal
         try {
             fis = openFileInput("investments.bak");
             ObjectInputStream ois = new ObjectInputStream(fis);
-            investmentList = (ArrayList<Investment>) ois.readObject();
+            ArrayList<Map.Entry<CryptoCompareTicker, CryptoCompareTicker>> tickerList = (ArrayList<Map.Entry<CryptoCompareTicker, CryptoCompareTicker>>) ois.readObject();
+            for (Map.Entry<CryptoCompareTicker, CryptoCompareTicker> tokenPair : tickerList) {
+                Investment inv = new Investment(tokenPair.getKey(), tokenPair.getValue());
+                inv.setRefreshListener(MainHome.this);
+                investmentList.add(inv);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -65,19 +70,13 @@ public class MainHome extends AppCompatActivity implements Investment.RefreshCal
         addedTokensRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         tokenRecapAdapter = new TokenRecapRecyclerAdapter(investmentList);
         addedTokensRecyclerView.setAdapter(tokenRecapAdapter);
+        updateList();
 
         swipeRefreshLayout = findViewById(R.id.refresh_tokens_price_layout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                for (int i = 0; i < investmentList.size(); i++) {
-                    final Investment investment = investmentList.get(i);
-                    final int finalI = i;
-
-                    investment.refreshValues(MainHome.this, investment.getReceivedToken(), "USD", i);
-                    investment.refreshValues(MainHome.this, investment.getInvestedTicker(), "USD", i);
-                }
-                tokenRecapAdapter.updateTokenList(investmentList);
+                updateList();
                 swipeRefreshLayout.setRefreshing(false);
             }
         });
@@ -130,12 +129,11 @@ public class MainHome extends AppCompatActivity implements Investment.RefreshCal
                 if (resultCode == RESULT_OK) {
                     final CryptoCompareTicker addedTicker = data.getParcelableExtra("receivedTicker");
                     final CryptoCompareTicker investedTicker = data.getParcelableExtra("investedTicker");
-                    final double investedAmount = data.getDoubleExtra("investedAmount", 0.0);
-                    final double receivedAmount = data.getDoubleExtra("receivedAmount", 0.0);
 
-                    final Investment investment = new Investment(addedTicker, receivedAmount, investedTicker, investedAmount);
-                    investment.refreshValues(MainHome.this, investedTicker, "USD", 0);
-                    investment.refreshValues(MainHome.this, addedTicker, "USD", 0);
+                    final Investment investment = new Investment(addedTicker, investedTicker);
+                    investment.refreshValue(MainHome.this, investedTicker, "USD", Investment.CounterpartType.FIAT);
+                    investment.refreshValue(MainHome.this, addedTicker, "USD", Investment.CounterpartType.FIAT);
+                    investment.refreshValue(MainHome.this, addedTicker, investedTicker.getSymbol(), Investment.CounterpartType.CRYPTO);
                     investment.setRefreshListener(this);
                     investmentList.add(investment);
                     tokenRecapAdapter.updateTokenList(investmentList);
@@ -143,7 +141,22 @@ public class MainHome extends AppCompatActivity implements Investment.RefreshCal
         }
     }
 
+    private void updateList() {
+        for (int i = 0; i < investmentList.size(); i++) {
+            final Investment investment = investmentList.get(i);
+
+            investment.refreshValue(MainHome.this, investment.getReceivedToken(), "USD", Investment.CounterpartType.FIAT);
+            investment.refreshValue(MainHome.this, investment.getInvestedTicker(), "USD", Investment.CounterpartType.FIAT);
+            investment.refreshValue(MainHome.this, investment.getReceivedToken(), investment.getInvestedTicker().getSymbol(), Investment.CounterpartType.CRYPTO);
+        }
+    }
+
     private void saveInvestmentListToFile() {
+        final ArrayList<Map.Entry<CryptoCompareTicker, CryptoCompareTicker>> investments = new ArrayList<>();
+        for (Investment investment : investmentList) {
+            investments.add(new AbstractMap.SimpleEntry<>(investment.getReceivedToken(), investment.getInvestedTicker()));
+        }
+
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -152,7 +165,7 @@ public class MainHome extends AppCompatActivity implements Investment.RefreshCal
                 try {
                     fos = openFileOutput("investments.bak", MODE_PRIVATE);
                     oos = new ObjectOutputStream(fos);
-                    oos.writeObject(investmentList);
+                    oos.writeObject(investments);
                     oos.flush();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -174,7 +187,6 @@ public class MainHome extends AppCompatActivity implements Investment.RefreshCal
 
     @Override
     public void refreshDone(Investment investment) {
-        Log.d("INVESTMENT PRICE", Double.toString(investment.getTotalFiatAmount()));
         tokenRecapAdapter.updateTokenList(investmentList);
         tokenRecapAdapter.notifyItemChanged(investmentList.indexOf(investment));
         saveInvestmentListToFile();

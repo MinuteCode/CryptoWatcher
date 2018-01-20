@@ -19,6 +19,8 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
     private String ImageUrl;
     private double originalConversionRateFiat;
     private double nowConversionRateFiat;
+    private double nowConversionRateCrypto;
+    private double amount = 0;
 
     public CryptoCompareTicker(String name, String coinName, String symbol, String fullName, String totalCoinSupply, String imageUrl) {
         Name = name;
@@ -29,6 +31,7 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
         ImageUrl = imageUrl;
         originalConversionRateFiat = 0;
         nowConversionRateFiat = 0;
+        amount = 0;
     }
 
     public CryptoCompareTicker(Parcel in) {
@@ -40,6 +43,16 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
         ImageUrl = in.readString();
         originalConversionRateFiat = in.readDouble();
         nowConversionRateFiat = in.readDouble();
+        amount = in.readDouble();
+        nowConversionRateCrypto = in.readDouble();
+    }
+
+    public double getNowConversionRateCrypto() {
+        return nowConversionRateCrypto;
+    }
+
+    public void setNowConversionRateCrypto(double nowConversionRateCrypto) {
+        this.nowConversionRateCrypto = nowConversionRateCrypto;
     }
 
     public double getNowConversionRateFiat() {
@@ -106,6 +119,14 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
         ImageUrl = imageUrl;
     }
 
+    public double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -121,6 +142,8 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
         parcel.writeString(ImageUrl);
         parcel.writeDouble(originalConversionRateFiat);
         parcel.writeDouble(nowConversionRateFiat);
+        parcel.writeDouble(amount);
+        parcel.writeDouble(nowConversionRateCrypto);
     }
 
     public static final Parcelable.Creator<CryptoCompareTicker> CREATOR = new Parcelable.Creator<CryptoCompareTicker>() {
@@ -147,7 +170,8 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
                     && TotalCoinSupply.equals(tick.getTotalCoinSupply())
                     && ImageUrl.equals(tick.getImageUrl())
                     && originalConversionRateFiat == tick.getOriginalConversionRateFiat()
-                    && nowConversionRateFiat == tick.getNowConversionRateFiat();
+                    && nowConversionRateFiat == tick.getNowConversionRateFiat()
+                    && amount == tick.getAmount();
         }
         
         return false;

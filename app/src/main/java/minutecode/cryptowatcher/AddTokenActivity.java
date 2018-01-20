@@ -96,12 +96,18 @@ public class AddTokenActivity extends AppCompatActivity {
                                 .setCallback(new FutureCallback<JsonObject>() {
                                     @Override
                                     public void onCompleted(Exception e, JsonObject result) {
-                                        double investedTokenConversionRate = result.get(investedTicker.getSymbol())
-                                                .getAsJsonObject()
-                                                .get("USD")
-                                                .getAsDouble();
-                                        investedTicker.setOriginalConversionRateFiat(investedTokenConversionRate);
-                                        valueAtInvestmentDate.setText(Double.toString(investedTokenConversionRate * Double.valueOf(investedAmount.getText().toString())) + "$");
+                                        if (e == null) {
+                                            double investedTokenConversionRate = result.get(investedTicker.getSymbol())
+                                                    .getAsJsonObject()
+                                                    .get("USD")
+                                                    .getAsDouble();
+                                            investedTicker.setOriginalConversionRateFiat(investedTokenConversionRate);
+                                            valueAtInvestmentDate.setText(Double.toString(investedTokenConversionRate * Double.valueOf(investedAmount.getText().toString())) + "$");
+                                        } else {
+                                            investedTicker.setOriginalConversionRateFiat(0);
+                                            valueAtInvestmentDate.setText(getString(R.string.not_a_number));
+                                            e.printStackTrace();
+                                        }
                                     }
                                 });
                     }
@@ -143,6 +149,22 @@ public class AddTokenActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 selectedTicker = cmcAdapterInvestment.getItem(position);
+                String getPriceUrl = Config.baseAPIUrl + Config.conversionUrlStart + selectedTicker.getSymbol() + Config.conversionUrlMiddle + "USD";
+                Ion.with(AddTokenActivity.this)
+                        .load(getPriceUrl)
+                        .asJsonObject()
+                        .setCallback(new FutureCallback<JsonObject>() {
+                            @Override
+                            public void onCompleted(Exception e, JsonObject result) {
+                                if (e == null) {
+                                    selectedTicker.setNowConversionRateFiat(
+                                            result.get("USD").getAsDouble()
+                                    );
+                                } else {
+                                    selectedTicker.setNowConversionRateFiat(0);
+                                }
+                            }
+                        });
             }
         });
 
@@ -157,9 +179,13 @@ public class AddTokenActivity extends AppCompatActivity {
                         .setCallback(new FutureCallback<JsonObject>() {
                             @Override
                             public void onCompleted(Exception e, JsonObject result) {
-                                investedTicker.setNowConversionRateFiat(
-                                        result.get("USD").getAsDouble()
-                                );
+                                if (e == null) {
+                                    investedTicker.setNowConversionRateFiat(
+                                            result.get("USD").getAsDouble()
+                                    );
+                                } else {
+                                    investedTicker.setNowConversionRateFiat(0);
+                                }
                             }
                         });
             }
@@ -168,11 +194,11 @@ public class AddTokenActivity extends AppCompatActivity {
         addTokenButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                selectedTicker.setAmount(Double.valueOf(receivedAmount.getText().toString()));
+                investedTicker.setAmount(Double.valueOf(investedAmount.getText().toString()));
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("receivedTicker", (Parcelable) selectedTicker);
                 resultIntent.putExtra("investedTicker", (Parcelable) investedTicker);
-                resultIntent.putExtra("receivedAmount", Double.valueOf(receivedAmount.getText().toString()));
-                resultIntent.putExtra("investedAmount", Double.valueOf(investedAmount.getText().toString()));
                 setResult(RESULT_OK, resultIntent);
                 finish();
             }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:state_pressed="true"
+        android:state_hovered="true">
+        <set>
+            <objectAnimator
+                android:propertyName="translationZ"
+                android:duration="@android:integer/config_shortAnimTime"
+                android:valueFrom="32dp"
+                android:valueTo="48dp"
+                android:valueType="floatType" />
+        </set>
+    </item>
+</selector>

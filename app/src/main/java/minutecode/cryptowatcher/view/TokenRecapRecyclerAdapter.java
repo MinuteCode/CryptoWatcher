@@ -1,5 +1,8 @@
 package minutecode.cryptowatcher.view;
 
+import android.graphics.drawable.VectorDrawable;
+import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -29,7 +32,7 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
     private ArrayList<Investment> tokenList;
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tokenName, receivedAmount, dollarConversion, investedTokenOutput;
+        TextView tokenName, receivedAmount, dollarConversion, investedTokenOutput, roiFiat, roiCrypto;
         CardView tokenCard;
         ImageView tokenImage;
 
@@ -41,6 +44,58 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
             receivedAmount = v.findViewById(R.id.received_amount);
             dollarConversion = v.findViewById(R.id.dollar_result);
             investedTokenOutput = v.findViewById(R.id.invested_token_output);
+            roiFiat = v.findViewById(R.id.roi_fiat);
+            roiCrypto = v.findViewById(R.id.roi_crypto);
+        }
+
+        private void setCryptoROIDrawable(double roi) {
+            if (roi > 0) {
+                VectorDrawable drawable = (VectorDrawable) itemView.getContext().getDrawable(R.drawable.ic_trending_up_black_24dp);
+                roiCrypto.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null);
+                int colorId = ContextCompat.getColor(itemView.getContext(), R.color.colorPositive);
+                drawable.setTint(colorId);
+                roiCrypto.setBackgroundColor(colorId);
+                roiCrypto.getBackground().setAlpha(50);
+            } else if (roi == 0) {
+                VectorDrawable drawable = (VectorDrawable) itemView.getContext().getDrawable(R.drawable.ic_trending_flat_black_24dp);
+                roiCrypto.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null);
+                int colorId = ContextCompat.getColor(itemView.getContext(), R.color.colorNeutral);
+                drawable.setTint(colorId);
+                roiCrypto.setBackgroundColor(colorId);
+                roiCrypto.getBackground().setAlpha(50);
+            } else if (roi < 0) {
+                VectorDrawable drawable = (VectorDrawable) itemView.getContext().getDrawable(R.drawable.ic_trending_down_black_24dp);
+                roiCrypto.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null);
+                int colorId = ContextCompat.getColor(itemView.getContext(), R.color.colorNegative);
+                drawable.setTint(colorId);
+                roiCrypto.setBackgroundColor(colorId);
+                roiCrypto.getBackground().setAlpha(50);
+            }
+        }
+
+        private void setFiatROIDrawable(double roi) {
+            if (roi > 0) {
+                VectorDrawable drawable = (VectorDrawable) itemView.getContext().getDrawable(R.drawable.ic_trending_up_black_24dp);
+                roiFiat.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null);
+                int colorId = ContextCompat.getColor(itemView.getContext(), R.color.colorPositive);
+                drawable.setTint(colorId);
+                roiFiat.setBackgroundColor(colorId);
+                roiFiat.getBackground().setAlpha(50);
+            } else if (roi == 0) {
+                VectorDrawable drawable = (VectorDrawable) itemView.getContext().getDrawable(R.drawable.ic_trending_flat_black_24dp);
+                roiFiat.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null);
+                int colorId = ContextCompat.getColor(itemView.getContext(), R.color.colorNeutral);
+                drawable.setTint(colorId);
+                roiFiat.setBackgroundColor(colorId);
+                roiFiat.getBackground().setAlpha(50);
+            } else if (roi < 0) {
+                VectorDrawable drawable = (VectorDrawable) itemView.getContext().getDrawable(R.drawable.ic_trending_down_black_24dp);
+                roiFiat.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null);
+                int colorId = ContextCompat.getColor(itemView.getContext(), R.color.colorNegative);
+                drawable.setTint(colorId);
+                roiFiat.setBackgroundColor(colorId);
+                roiFiat.getBackground().setAlpha(50);
+            }
         }
     }
 
@@ -63,12 +118,30 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
         Ion.with(holder.tokenImage)
                 .load(Config.baseImageUrl + token.getReceivedToken().getImageUrl());
 
-        holder.tokenCard.setCardElevation(16);
+        holder.tokenCard.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                
+                return true;
+            }
+        });
+
         holder.tokenName.setText(token.getReceivedToken().getFullName());
-        holder.receivedAmount.setText(Double.toString(token.getReceivedAmount()) + " " + token.getReceivedToken().getSymbol());
-        holder.dollarConversion.setText(String.format(Locale.getDefault(), "%1$.2f", token.getTotalFiatAmount()) + holder.itemView.getContext().getString(R.string.dollar_symbol));
+        holder.receivedAmount.setText(Double.toString(token.getReceivedToken().getAmount()) + " " + token.getReceivedToken().getSymbol());
+        holder.dollarConversion.setText(String.format(Locale.getDefault(), "%1$.2f", token.getTotalFiatAmount()) + " " + holder.itemView.getContext().getString(R.string.dollar_symbol));
         String tokenOutput = String.format(Locale.getDefault(), "%1$.5f", token.getTokenOutput()) + " " + token.getInvestedTicker().getSymbol();
         holder.investedTokenOutput.setText(tokenOutput);
+
+        String cryptoRoi = String.format(Locale.getDefault(), "%1$.2f", token.getCryptoROI());
+        holder.roiCrypto.setText("Crypto ROI : \n" + cryptoRoi + " %");
+        String fiatRoi = String.format(Locale.getDefault(), "%1$.2f", token.getFiatROI());
+        holder.roiFiat.setText("Fiat ROI : \n" + fiatRoi + " %");
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            holder.setCryptoROIDrawable(token.getCryptoROI());
+            holder.setFiatROIDrawable(token.getFiatROI());
+        }
+
     }
 
     @Override
