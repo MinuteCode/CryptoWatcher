@@ -12,8 +12,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import minutecode.cryptowatcher.MainHome;
-
 /**
  * Created by Benjamin on 1/13/2018.
  */
@@ -27,6 +25,8 @@ public class Investment implements Serializable {
     private double tokenOutput;
     private double totalFiatAmount;
 
+    private RefreshCallback refreshListener;
+
     public Investment(CryptoCompareTicker receivedToken, double receivedAmount, CryptoCompareTicker investedTicker, double investedAmountCrypto) {
         this.receivedToken = receivedToken;
         this.investedTicker = investedTicker;
@@ -35,12 +35,20 @@ public class Investment implements Serializable {
         this.tokenOutput = 0;
     }
 
-    public void computeReceivedDollarConversion(Double price) {
-        totalFiatAmount = receivedAmount * price;
+    public void computeReceivedDollarConversion() {
+        totalFiatAmount = receivedAmount * receivedToken.getNowConversionRateFiat();
     }
 
     public void computeTokenOutput() {
         tokenOutput = totalFiatAmount / investedTicker.getNowConversionRateFiat();
+    }
+
+    public RefreshCallback getRefreshListener() {
+        return refreshListener;
+    }
+
+    public void setRefreshListener(RefreshCallback refreshListener) {
+        this.refreshListener = refreshListener;
     }
 
     public double getTokenOutput() {
@@ -98,10 +106,20 @@ public class Investment implements Serializable {
                 .setCallback(new FutureCallback<JsonObject>() {
                     @Override
                     public void onCompleted(Exception e, JsonObject result) {
-                        double conversionDollar = result.get(against).getAsDouble();
+                        if (e == null) {
+                            double conversionDollar = result.get(against).getAsDouble();
 
-                        ticker.setNowConversionRateFiat(conversionDollar);
-                        computeTokenOutput();
+                            ticker.setNowConversionRateFiat(conversionDollar);
+                            computeReceivedDollarConversion();
+                            computeTokenOutput();
+                            refreshListener.refreshDone(Investment.this);
+                        } else {
+                            /*ticker.setNowConversionRateFiat(0);
+                            computeReceivedDollarConversion();
+                            computeTokenOutput();
+                            refreshListener.refreshDone(Investment.this);*/
+                            e.printStackTrace();
+                        }
                     }
                 });
     }
@@ -158,5 +176,9 @@ public class Investment implements Serializable {
                 && investedAmountCrypto == comparison.getInvestedAmountCrypto()
                 && tokenOutput == comparison.getTokenOutput()
                 && totalFiatAmount == comparison.getTotalFiatAmount();
+    }
+
+    public interface RefreshCallback {
+        void refreshDone(Investment investment);
     }
 }

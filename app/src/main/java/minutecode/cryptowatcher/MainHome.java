@@ -8,15 +8,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
-import com.koushikdutta.async.future.FutureCallback;
-import com.koushikdutta.ion.Ion;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -25,12 +21,11 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import minutecode.cryptowatcher.model.Config;
 import minutecode.cryptowatcher.model.CryptoCompareTicker;
 import minutecode.cryptowatcher.model.Investment;
 import minutecode.cryptowatcher.view.TokenRecapRecyclerAdapter;
 
-public class MainHome extends AppCompatActivity{
+public class MainHome extends AppCompatActivity implements Investment.RefreshCallback {
 
     final static int ADD_TOKEN_REQUEST = 1;
 
@@ -79,55 +74,11 @@ public class MainHome extends AppCompatActivity{
                     final Investment investment = investmentList.get(i);
                     final int finalI = i;
 
-                    Ion.with(MainHome.this)
-                            .load(Config.baseAPIUrl + Config.conversionUrlStart + investment.getReceivedToken().getSymbol() + Config.conversionUrlMiddle + "USD")
-                            .asJsonObject()
-                            .setCallback(new FutureCallback<JsonObject>() {
-                                @Override
-                                public void onCompleted(Exception e, JsonObject result) {
-                                    double conversionDollar = result.get("USD").getAsDouble();
-                                    investment.getReceivedToken().setNowConversionRateFiat(conversionDollar);
-                                    investment.computeReceivedDollarConversion(investment.getReceivedToken().getNowConversionRateFiat());
-
-                                    updatedInvestments++;
-                                    if (updatedInvestments == investmentList.size()) {
-                                        updatedInvestments = 0;
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                tokenRecapAdapter.updateTokenList(investmentList);
-                                                swipeRefreshLayout.setRefreshing(false);
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-
+                    investment.refreshValues(MainHome.this, investment.getReceivedToken(), "USD", i);
                     investment.refreshValues(MainHome.this, investment.getInvestedTicker(), "USD", i);
-
-                    /*Ion.with(MainHome.this)
-                            .load(Config.baseAPIUrl + Config.conversionUrlStart + investment.getInvestedTicker().getSymbol() + Config.conversionUrlMiddle + "USD")
-                            .asJsonObject()
-                            .setCallback(new FutureCallback<JsonObject>() {
-                                @Override
-                                public void onCompleted(Exception e, JsonObject result) {
-                                    double conversionDollar = result.get("USD").getAsDouble();
-
-                                    investment.getInvestedTicker().setNowConversionRateFiat(conversionDollar);
-                                    investment.computeTokenOutput();
-                                    if (updatedInvestments == investmentList.size()) {
-                                        updatedInvestments = 0;
-                                        saveInvestmentListToFile();
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                swipeRefreshLayout.setRefreshing(false);
-                                            }
-                                        });
-                                    }
-                                }
-                            });*/
                 }
+                tokenRecapAdapter.updateTokenList(investmentList);
+                swipeRefreshLayout.setRefreshing(false);
             }
         });
 
@@ -183,20 +134,11 @@ public class MainHome extends AppCompatActivity{
                     final double receivedAmount = data.getDoubleExtra("receivedAmount", 0.0);
 
                     final Investment investment = new Investment(addedTicker, receivedAmount, investedTicker, investedAmount);
-
-                    Ion.with(this)
-                            .load(Config.baseAPIUrl + Config.conversionUrlStart + addedTicker.getSymbol() + Config.conversionUrlMiddle + "USD")
-                            .as(new TypeToken<JsonObject>() {
-                            })
-                            .setCallback(new FutureCallback<JsonObject>() {
-                                @Override
-                                public void onCompleted(Exception e, JsonObject result) {
-                                    investment.computeReceivedDollarConversion(result.get("USD").getAsDouble());
-                                    investment.computeTokenOutput();
-                                    investmentList.add(investment);
-                                    tokenRecapAdapter.updateTokenList(investmentList);
-                                }
-                            });
+                    investment.refreshValues(MainHome.this, investedTicker, "USD", 0);
+                    investment.refreshValues(MainHome.this, addedTicker, "USD", 0);
+                    investment.setRefreshListener(this);
+                    investmentList.add(investment);
+                    tokenRecapAdapter.updateTokenList(investmentList);
                 }
         }
     }
@@ -228,5 +170,13 @@ public class MainHome extends AppCompatActivity{
             }
         });
         t.start();
+    }
+
+    @Override
+    public void refreshDone(Investment investment) {
+        Log.d("INVESTMENT PRICE", Double.toString(investment.getTotalFiatAmount()));
+        tokenRecapAdapter.updateTokenList(investmentList);
+        tokenRecapAdapter.notifyItemChanged(investmentList.indexOf(investment));
+        saveInvestmentListToFile();
     }
 }

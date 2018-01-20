@@ -45,7 +45,8 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
     }
 
     public TokenRecapRecyclerAdapter(List<Investment> lst) {
-        tokenList = (ArrayList<Investment>) lst;
+        tokenList = new ArrayList<>(lst.size());
+        tokenList.addAll(lst);
     }
 
     @Override
