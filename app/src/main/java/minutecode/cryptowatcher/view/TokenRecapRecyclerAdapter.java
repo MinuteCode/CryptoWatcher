@@ -14,9 +14,12 @@ import android.widget.TextView;
 
 import com.koushikdutta.ion.Ion;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import minutecode.cryptowatcher.R;
 import minutecode.cryptowatcher.model.Config;
@@ -32,7 +35,7 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
     private ArrayList<Investment> tokenList;
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tokenName, receivedAmount, dollarConversion, investedTokenOutput, roiFiat, roiCrypto;
+        TextView tokenName, receivedAmount, dollarConversion, investedTokenOutput, roiFiat, roiCrypto, updateTime;
         CardView tokenCard;
         ImageView tokenImage;
 
@@ -46,6 +49,7 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
             investedTokenOutput = v.findViewById(R.id.invested_token_output);
             roiFiat = v.findViewById(R.id.roi_fiat);
             roiCrypto = v.findViewById(R.id.roi_crypto);
+            updateTime = v.findViewById(R.id.update_time);
         }
 
         private void setCryptoROIDrawable(double roi) {
@@ -132,10 +136,14 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
         String tokenOutput = String.format(Locale.getDefault(), "%1$.5f", token.getTokenOutput()) + " " + token.getInvestedTicker().getSymbol();
         holder.investedTokenOutput.setText(tokenOutput);
 
+        SimpleDateFormat sdf = new SimpleDateFormat("'Last updated : ' dd/MM/yyyy H':'mm");
+        String dateFormatted = sdf.format(Calendar.getInstance(TimeZone.getDefault()).getTime());
+        holder.updateTime.setText(dateFormatted);
+
         String cryptoRoi = String.format(Locale.getDefault(), "%1$.2f", token.getCryptoROI());
-        holder.roiCrypto.setText("Crypto ROI : \n" + cryptoRoi + " %");
+        holder.roiCrypto.setText("Crypto change : \n" + cryptoRoi + " %");
         String fiatRoi = String.format(Locale.getDefault(), "%1$.2f", token.getFiatROI());
-        holder.roiFiat.setText("Fiat ROI : \n" + fiatRoi + " %");
+        holder.roiFiat.setText("Fiat change : \n" + fiatRoi + " %");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             holder.setCryptoROIDrawable(token.getCryptoROI());

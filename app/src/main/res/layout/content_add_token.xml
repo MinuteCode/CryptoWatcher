@@ -43,18 +43,21 @@
 
     <EditText
         android:id="@+id/invested_amount_edit_text"
-        android:layout_width="239dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:hint="@string/invested_amount"
         android:inputType="numberDecimal"
+        app:layout_constraintEnd_toStartOf="@+id/investment_currency_describer_textview"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/token_name_autocomplete_textview" />
 
     <TextView
         android:id="@+id/investment_currency_describer_textview"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
@@ -66,13 +69,15 @@
 
     <android.support.v7.widget.AppCompatAutoCompleteTextView
         android:id="@+id/investment_currency_name_autocomplete_textview"
-        android:layout_width="91dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:hint="@string/currency_name"
         android:inputType="textCapCharacters"
         app:layout_constraintBaseline_toBaselineOf="@id/invested_amount_edit_text"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/investment_currency_describer_textview" />
 
     <TextView
         android:id="@+id/on_date_textview"
@@ -124,47 +129,6 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="Invested :"
-        android:textSize="16sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView6" />
-
-    <TextView
-        android:id="@+id/investment_amount_recap"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="0.1 ETH"
-        android:textSize="16sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView2"
-        app:layout_constraintStart_toEndOf="@+id/textView2" />
-
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="equals"
-        android:textSize="16sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/investment_amount_recap"
-        app:layout_constraintStart_toEndOf="@+id/investment_amount_recap" />
-
-    <TextView
-        android:id="@+id/value_at_investment_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="100 $"
-        android:textSize="16sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView4"
-        app:layout_constraintStart_toEndOf="@+id/textView4" />
-
-    <TextView
         android:id="@+id/textView6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -180,28 +144,85 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/date_edit_text" />
 
-    <TextView
-        android:id="@+id/textView7"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="@string/on_date"
-        app:layout_constraintBaseline_toBaselineOf="@+id/value_at_investment_date"
-        app:layout_constraintStart_toEndOf="@+id/value_at_investment_date" />
-
-    <TextView
-        android:id="@+id/date_recap_textview"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/recap_linear_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:scrollHorizontally="false"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:lines="2"
-        android:text="ICO participation date"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textView7"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textView7" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textView6">
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="Invested :"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView6" />
+
+        <TextView
+            android:id="@+id/investment_amount_recap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="0.1 ETH"
+            android:textSize="16sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/textView2"
+            app:layout_constraintStart_toEndOf="@+id/textView2" />
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="equals"
+            android:textSize="16sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/investment_amount_recap"
+            app:layout_constraintStart_toEndOf="@+id/investment_amount_recap" />
+
+        <TextView
+            android:id="@+id/value_at_investment_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="100 $"
+            android:textSize="16sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/textView4"
+            app:layout_constraintStart_toEndOf="@+id/textView4" />
+
+        <TextView
+            android:id="@+id/textView7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/on_date"
+            app:layout_constraintBaseline_toBaselineOf="@+id/value_at_investment_date"
+            app:layout_constraintStart_toEndOf="@+id/value_at_investment_date" />
+
+        <TextView
+            android:id="@+id/date_recap_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:lines="2"
+            android:paddingEnd="8dp"
+            android:paddingStart="8dp"
+            android:scrollHorizontally="false"
+            android:text="01/01/2018"
+            android:gravity="center"
+            app:layout_constraintBaseline_toBaselineOf="@+id/textView7"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/textView7" />
+
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
