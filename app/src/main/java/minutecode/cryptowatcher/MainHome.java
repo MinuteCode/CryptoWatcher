@@ -73,7 +73,7 @@ public class MainHome extends AppCompatActivity implements Investment.RefreshCal
         addedTokensRecyclerView = findViewById(R.id.added_token_recycler_view);
         addedTokensRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         tokenRecapAdapter = new TokenRecapRecyclerAdapter(investmentList);
-        tokenRecapAdapter.setTokenListListner(this);
+        tokenRecapAdapter.setTokenListListener(this);
         addedTokensRecyclerView.setAdapter(tokenRecapAdapter);
         updateList();
 

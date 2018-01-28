@@ -1,7 +1,9 @@
 package minutecode.cryptowatcher.view;
 
+import android.content.Intent;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Build;
+import android.os.Parcelable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.CardView;
@@ -21,6 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import minutecode.cryptowatcher.GraphActivity;
 import minutecode.cryptowatcher.R;
 import minutecode.cryptowatcher.model.Config;
 import minutecode.cryptowatcher.model.Investment;
@@ -33,7 +36,7 @@ import minutecode.cryptowatcher.model.InvestmentDiffCallback;
 public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRecyclerAdapter.ViewHolder> {
 
     private ArrayList<Investment> tokenList;
-    private OnTokenListAction tokenListListner;
+    private OnTokenListAction tokenListListener;
 
     class ViewHolder extends RecyclerView.ViewHolder {
         TextView tokenName, receivedAmount, dollarConversion, investedTokenOutput, roiFiat, roiCrypto, updateTime;
@@ -127,8 +130,17 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
             @Override
             public boolean onLongClick(View view) {
                 holder.tokenCard.setCardElevation(100);
-                tokenListListner.onLongClick(position);
+                tokenListListener.onLongClick(position);
                 return true;
+            }
+        });
+
+        holder.tokenCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent toGraph = new Intent(holder.itemView.getContext(), GraphActivity.class);
+                toGraph.putExtra("ticker", (Parcelable) tokenList.get(position));
+                holder.itemView.getContext().startActivity(toGraph);
             }
         });
 
@@ -168,12 +180,12 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
         this.tokenList = tokenList;
     }
 
-    public OnTokenListAction getTokenListListner() {
-        return tokenListListner;
+    public OnTokenListAction getTokenListListener() {
+        return tokenListListener;
     }
 
-    public void setTokenListListner(OnTokenListAction tokenListListner) {
-        this.tokenListListner = tokenListListner;
+    public void setTokenListListener(OnTokenListAction tokenListListener) {
+        this.tokenListListener = tokenListListener;
     }
 
     public void updateTokenList(List<Investment> newList) {

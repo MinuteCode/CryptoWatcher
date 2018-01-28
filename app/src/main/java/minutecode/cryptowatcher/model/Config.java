@@ -13,4 +13,8 @@ public class Config {
     public static final String conversionHistoricalUrlStart = "pricehistorical?fsym=";
     public static final String conversionUrlMiddle = "&tsyms=";
     public static final String timeStampParameter = "&ts=";
+    public static final String histoHour = "histohour?fsym=";
+    public static final String histoDay = "histoday?fsym=";
+    public static final String singleToSym = "&tsym=";
+    public static final String limit = "&limit=";
 }

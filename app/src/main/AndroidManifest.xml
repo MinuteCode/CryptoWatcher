@@ -12,17 +12,19 @@
         <activity
             android:name=".MainHome"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AddTokenActivity"
+        <activity
+            android:name=".AddTokenActivity"
             android:parentActivityName=".MainHome"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
+        <activity android:name=".GraphActivity"></activity>
     </application>
 
 </manifest>

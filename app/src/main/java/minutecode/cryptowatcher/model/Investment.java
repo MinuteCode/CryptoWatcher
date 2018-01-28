@@ -1,6 +1,8 @@
 package minutecode.cryptowatcher.model;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
@@ -16,7 +18,7 @@ import java.io.Serializable;
  * Created by Benjamin on 1/13/2018.
  */
 
-public class Investment implements Serializable {
+public class Investment implements Serializable, Parcelable {
     private CryptoCompareTicker receivedToken;
     private CryptoCompareTicker investedTicker;
 
@@ -26,6 +28,42 @@ public class Investment implements Serializable {
     private double fiatROI;
 
     private RefreshCallback refreshListener;
+
+    public Investment(Parcel parcel) {
+        receivedToken = parcel.readParcelable(CryptoCompareTicker.class.getClassLoader());
+        investedTicker = parcel.readParcelable(CryptoCompareTicker.class.getClassLoader());
+        tokenOutput = parcel.readDouble();
+        totalFiatAmount = parcel.readDouble();
+        cryptoROI = parcel.readDouble();
+        fiatROI = parcel.readDouble();
+    }
+
+    public static final Parcelable.Creator<Investment> CREATOR = new Creator<Investment>() {
+        @Override
+        public Investment createFromParcel(Parcel parcel) {
+            return new Investment(parcel);
+        }
+
+        @Override
+        public Investment[] newArray(int i) {
+            return new Investment[i];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeParcelable(receivedToken, 0);
+        parcel.writeParcelable(investedTicker, 0);
+        parcel.writeDouble(tokenOutput);
+        parcel.writeDouble(totalFiatAmount);
+        parcel.writeDouble(cryptoROI);
+        parcel.writeDouble(fiatROI);
+    }
 
     public enum CounterpartType {
         FIAT,
