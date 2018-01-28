@@ -5,12 +5,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.gson.JsonObject;
@@ -40,6 +43,7 @@ public class AddTokenActivity extends AppCompatActivity {
     private TextView valueAtInvestmentDate;
     private TextView dateRecapTextView;
     private Button addTokenButton;
+    private LinearLayout recapLayout;
 
     private List<CryptoCompareTicker> tickerList;
     private CryptoCompareTickerAdapter cmcAdapterInvestment;
@@ -63,6 +67,7 @@ public class AddTokenActivity extends AppCompatActivity {
         dateInvested = findViewById(R.id.date_edit_text);
         valueAtInvestmentDate = findViewById(R.id.value_at_investment_date);
         dateRecapTextView = findViewById(R.id.date_recap_textview);
+        recapLayout = findViewById(R.id.recap_linear_layout);
 
         dateInvested.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,7 +107,8 @@ public class AddTokenActivity extends AppCompatActivity {
                                                     .get("USD")
                                                     .getAsDouble();
                                             investedTicker.setOriginalConversionRateFiat(investedTokenConversionRate);
-                                            valueAtInvestmentDate.setText(Double.toString(investedTokenConversionRate * Double.valueOf(investedAmount.getText().toString())) + "$");
+                                            String value = String.format(Locale.getDefault(), "%1$.3f", investedTokenConversionRate * Double.valueOf(investedAmount.getText().toString()));
+                                            valueAtInvestmentDate.setText(value + " $");
                                         } else {
                                             investedTicker.setOriginalConversionRateFiat(0);
                                             valueAtInvestmentDate.setText(getString(R.string.not_a_number));
@@ -115,6 +121,23 @@ public class AddTokenActivity extends AppCompatActivity {
                         Calendar.getInstance().get(Calendar.YEAR),
                         Calendar.getInstance().get(Calendar.MONTH),
                         Calendar.getInstance().get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
+
+        dateInvested.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                recapLayout.setVisibility(View.VISIBLE);
             }
         });
 
@@ -196,6 +219,7 @@ public class AddTokenActivity extends AppCompatActivity {
             public void onClick(View view) {
                 selectedTicker.setAmount(Double.valueOf(receivedAmount.getText().toString()));
                 investedTicker.setAmount(Double.valueOf(investedAmount.getText().toString()));
+                selectedTicker.setOriginalConversionRateCrypto(investedTicker.getAmount() / selectedTicker.getAmount());
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("receivedTicker", (Parcelable) selectedTicker);
                 resultIntent.putExtra("investedTicker", (Parcelable) investedTicker);

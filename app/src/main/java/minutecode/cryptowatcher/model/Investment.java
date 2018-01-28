@@ -114,17 +114,21 @@ public class Investment implements Serializable {
 
                             switch (type) {
                                 case FIAT:
-                                    fiatROI = (conversion - ticker.getNowConversionRateFiat()) / conversion * 100;
-                                    ticker.setNowConversionRateFiat(conversion);
-                                    computeReceivedDollarConversion();
+                                    if (ticker == receivedToken) {
+                                        fiatROI = (conversion / ticker.getOriginalConversionRateFiat()) * 100;
+                                        ticker.setNowConversionRateFiat(conversion);
+                                        computeReceivedDollarConversion();
+                                    }
                                     break;
 
                                 case CRYPTO:
-                                    cryptoROI = (conversion - ticker.getNowConversionRateCrypto()) / conversion * 100;
-                                    ticker.setNowConversionRateCrypto(conversion);
-                                    computeTokenOutput();
+                                    if (ticker == receivedToken) {
+                                        cryptoROI = (conversion / ticker.getOriginalConversionRateCrypto()) * 100;
+                                        ticker.setNowConversionRateCrypto(conversion);
+                                        computeTokenOutput();
+                                    }
+                                    break;
                             }
-
 
                             refreshListener.refreshDone(Investment.this);
                         } else {

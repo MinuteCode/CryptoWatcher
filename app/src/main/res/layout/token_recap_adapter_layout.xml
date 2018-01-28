@@ -9,7 +9,7 @@
     android:layout_marginStart="8dp"
     android:layout_marginTop="8dp"
     app:cardCornerRadius="4dp"
-    app:cardElevation="32dp"
+    app:cardElevation="24dp"
     android:stateListAnimator="@animator/adapter_long_click_animator"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"

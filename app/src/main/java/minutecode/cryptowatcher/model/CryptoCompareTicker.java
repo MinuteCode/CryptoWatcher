@@ -18,6 +18,7 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
     private String TotalCoinSupply;
     private String ImageUrl;
     private double originalConversionRateFiat;
+    private double originalConversionRateCrypto;
     private double nowConversionRateFiat;
     private double nowConversionRateCrypto;
     private double amount = 0;
@@ -30,6 +31,7 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
         TotalCoinSupply = totalCoinSupply;
         ImageUrl = imageUrl;
         originalConversionRateFiat = 0;
+        originalConversionRateCrypto = 0;
         nowConversionRateFiat = 0;
         amount = 0;
     }
@@ -42,6 +44,7 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
         TotalCoinSupply = in.readString();
         ImageUrl = in.readString();
         originalConversionRateFiat = in.readDouble();
+        originalConversionRateCrypto = in.readDouble();
         nowConversionRateFiat = in.readDouble();
         amount = in.readDouble();
         nowConversionRateCrypto = in.readDouble();
@@ -69,6 +72,14 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
 
     public void setOriginalConversionRateFiat(double originalConversionRateFiat) {
         this.originalConversionRateFiat = originalConversionRateFiat;
+    }
+
+    public double getOriginalConversionRateCrypto() {
+        return originalConversionRateCrypto;
+    }
+
+    public void setOriginalConversionRateCrypto(double originalConversionRateCrypto) {
+        this.originalConversionRateCrypto = originalConversionRateCrypto;
     }
 
     public String getCoinName() {
@@ -141,6 +152,7 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
         parcel.writeString(TotalCoinSupply);
         parcel.writeString(ImageUrl);
         parcel.writeDouble(originalConversionRateFiat);
+        parcel.writeDouble(originalConversionRateCrypto);
         parcel.writeDouble(nowConversionRateFiat);
         parcel.writeDouble(amount);
         parcel.writeDouble(nowConversionRateCrypto);
@@ -170,6 +182,7 @@ public class CryptoCompareTicker implements Parcelable, Serializable {
                     && TotalCoinSupply.equals(tick.getTotalCoinSupply())
                     && ImageUrl.equals(tick.getImageUrl())
                     && originalConversionRateFiat == tick.getOriginalConversionRateFiat()
+                    && originalConversionRateCrypto == tick.getOriginalConversionRateCrypto()
                     && nowConversionRateFiat == tick.getNowConversionRateFiat()
                     && amount == tick.getAmount();
         }

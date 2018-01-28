@@ -33,6 +33,7 @@ import minutecode.cryptowatcher.model.InvestmentDiffCallback;
 public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRecyclerAdapter.ViewHolder> {
 
     private ArrayList<Investment> tokenList;
+    private OnTokenListAction tokenListListner;
 
     class ViewHolder extends RecyclerView.ViewHolder {
         TextView tokenName, receivedAmount, dollarConversion, investedTokenOutput, roiFiat, roiCrypto, updateTime;
@@ -125,7 +126,8 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
         holder.tokenCard.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                
+                holder.tokenCard.setCardElevation(100);
+                tokenListListner.onLongClick(position);
                 return true;
             }
         });
@@ -142,6 +144,7 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
 
         String cryptoRoi = String.format(Locale.getDefault(), "%1$.2f", token.getCryptoROI());
         holder.roiCrypto.setText("Crypto change : \n" + cryptoRoi + " %");
+
         String fiatRoi = String.format(Locale.getDefault(), "%1$.2f", token.getFiatROI());
         holder.roiFiat.setText("Fiat change : \n" + fiatRoi + " %");
 
@@ -157,6 +160,22 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
         return tokenList.size();
     }
 
+    public ArrayList<Investment> getTokenList() {
+        return tokenList;
+    }
+
+    public void setTokenList(ArrayList<Investment> tokenList) {
+        this.tokenList = tokenList;
+    }
+
+    public OnTokenListAction getTokenListListner() {
+        return tokenListListner;
+    }
+
+    public void setTokenListListner(OnTokenListAction tokenListListner) {
+        this.tokenListListner = tokenListListner;
+    }
+
     public void updateTokenList(List<Investment> newList) {
         final InvestmentDiffCallback diffCallback = new InvestmentDiffCallback(tokenList, newList);
         final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
@@ -164,5 +183,9 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
         tokenList.clear();
         tokenList.addAll(newList);
         diffResult.dispatchUpdatesTo(this);
+    }
+
+    public interface OnTokenListAction {
+        void onLongClick(int position);
     }
 }

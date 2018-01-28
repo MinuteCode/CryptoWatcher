@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -26,7 +27,7 @@ import minutecode.cryptowatcher.model.CryptoCompareTicker;
 import minutecode.cryptowatcher.model.Investment;
 import minutecode.cryptowatcher.view.TokenRecapRecyclerAdapter;
 
-public class MainHome extends AppCompatActivity implements Investment.RefreshCallback {
+public class MainHome extends AppCompatActivity implements Investment.RefreshCallback, TokenRecapRecyclerAdapter.OnTokenListAction {
 
     final static int ADD_TOKEN_REQUEST = 1;
 
@@ -34,8 +35,11 @@ public class MainHome extends AppCompatActivity implements Investment.RefreshCal
     private TokenRecapRecyclerAdapter tokenRecapAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView noIcoText;
+    private Menu optionsMenu;
 
     private List<Investment> investmentList = new ArrayList<>();
+    private int selectedPosition;
+    private CardView selectedCard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +73,7 @@ public class MainHome extends AppCompatActivity implements Investment.RefreshCal
         addedTokensRecyclerView = findViewById(R.id.added_token_recycler_view);
         addedTokensRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         tokenRecapAdapter = new TokenRecapRecyclerAdapter(investmentList);
+        tokenRecapAdapter.setTokenListListner(this);
         addedTokensRecyclerView.setAdapter(tokenRecapAdapter);
         updateList();
 
@@ -99,6 +104,7 @@ public class MainHome extends AppCompatActivity implements Investment.RefreshCal
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main_home, menu);
+        optionsMenu = menu;
         return true;
     }
 
@@ -110,7 +116,14 @@ public class MainHome extends AppCompatActivity implements Investment.RefreshCal
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_delete) {
+            investmentList.remove(selectedPosition);
+            tokenRecapAdapter.updateTokenList(investmentList);
+            tokenRecapAdapter.notifyItemRemoved(selectedPosition);
+
+            saveInvestmentListToFile();
+            selectedPosition = 9999;
+            item.setVisible(false);
             return true;
         }
 
@@ -129,6 +142,7 @@ public class MainHome extends AppCompatActivity implements Investment.RefreshCal
                 if (resultCode == RESULT_OK) {
                     final CryptoCompareTicker addedTicker = data.getParcelableExtra("receivedTicker");
                     final CryptoCompareTicker investedTicker = data.getParcelableExtra("investedTicker");
+                    addedTicker.setOriginalConversionRateFiat(investedTicker.getOriginalConversionRateFiat() * investedTicker.getAmount() / addedTicker.getAmount());
 
                     final Investment investment = new Investment(addedTicker, investedTicker);
                     investment.refreshValue(MainHome.this, investedTicker, "USD", Investment.CounterpartType.FIAT);
@@ -190,5 +204,12 @@ public class MainHome extends AppCompatActivity implements Investment.RefreshCal
         tokenRecapAdapter.updateTokenList(investmentList);
         tokenRecapAdapter.notifyItemChanged(investmentList.indexOf(investment));
         saveInvestmentListToFile();
+    }
+
+
+    @Override
+    public void onLongClick(int position) {
+        optionsMenu.getItem(0).setVisible(true);
+        selectedPosition = position;
     }
 }
