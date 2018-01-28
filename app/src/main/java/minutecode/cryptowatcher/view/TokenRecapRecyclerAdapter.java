@@ -54,21 +54,21 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
         }
 
         private void setCryptoROIDrawable(double roi) {
-            if (roi > 0) {
+            if (roi > 100) {
                 VectorDrawable drawable = (VectorDrawable) itemView.getContext().getDrawable(R.drawable.ic_trending_up_black_24dp);
                 roiCrypto.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null);
                 int colorId = ContextCompat.getColor(itemView.getContext(), R.color.colorPositive);
                 drawable.setTint(colorId);
                 roiCrypto.setBackgroundColor(colorId);
                 roiCrypto.getBackground().setAlpha(50);
-            } else if (roi == 0) {
+            } else if (roi == 100) {
                 VectorDrawable drawable = (VectorDrawable) itemView.getContext().getDrawable(R.drawable.ic_trending_flat_black_24dp);
                 roiCrypto.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null);
                 int colorId = ContextCompat.getColor(itemView.getContext(), R.color.colorNeutral);
                 drawable.setTint(colorId);
                 roiCrypto.setBackgroundColor(colorId);
                 roiCrypto.getBackground().setAlpha(50);
-            } else if (roi < 0) {
+            } else if (roi < 100) {
                 VectorDrawable drawable = (VectorDrawable) itemView.getContext().getDrawable(R.drawable.ic_trending_down_black_24dp);
                 roiCrypto.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null);
                 int colorId = ContextCompat.getColor(itemView.getContext(), R.color.colorNegative);
@@ -79,21 +79,21 @@ public class TokenRecapRecyclerAdapter extends RecyclerView.Adapter<TokenRecapRe
         }
 
         private void setFiatROIDrawable(double roi) {
-            if (roi > 0) {
+            if (roi > 100) {
                 VectorDrawable drawable = (VectorDrawable) itemView.getContext().getDrawable(R.drawable.ic_trending_up_black_24dp);
                 roiFiat.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null);
                 int colorId = ContextCompat.getColor(itemView.getContext(), R.color.colorPositive);
                 drawable.setTint(colorId);
                 roiFiat.setBackgroundColor(colorId);
                 roiFiat.getBackground().setAlpha(50);
-            } else if (roi == 0) {
+            } else if (roi == 100) {
                 VectorDrawable drawable = (VectorDrawable) itemView.getContext().getDrawable(R.drawable.ic_trending_flat_black_24dp);
                 roiFiat.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null);
                 int colorId = ContextCompat.getColor(itemView.getContext(), R.color.colorNeutral);
                 drawable.setTint(colorId);
                 roiFiat.setBackgroundColor(colorId);
                 roiFiat.getBackground().setAlpha(50);
-            } else if (roi < 0) {
+            } else if (roi < 100) {
                 VectorDrawable drawable = (VectorDrawable) itemView.getContext().getDrawable(R.drawable.ic_trending_down_black_24dp);
                 roiFiat.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null);
                 int colorId = ContextCompat.getColor(itemView.getContext(), R.color.colorNegative);
